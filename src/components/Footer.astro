@@ -1,0 +1,154 @@
+---
+const footerSections = [
+  {
+    title: "Tools",
+    links: [
+      { label: "DPI Analyzer", href: "/dpi-analyzer" },
+      { label: "Screen Ruler", href: "/screen-ruler" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { label: "How It Works", href: "/how-it-works" },
+      { label: "FAQ", href: "/faq" },
+      { label: "About", href: "/about" },
+    ],
+  },
+  {
+    title: "Connect",
+    links: [
+      { label: "GitHub", href: "https://github.com" },
+      { label: "Twitter", href: "https://twitter.com" },
+    ],
+  },
+];
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <!-- Brand column -->
+      <div class="footer-brand">
+        <a href="/" class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="4" fill="#171717"/>
+            <path d="M8 7L8 17M12 10L12 17M16 7L16 17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Mouse DPI Analyzer</span>
+        </a>
+        <p class="footer-tagline">Precise mouse DPI measurement,<br/>right in your browser.</p>
+      </div>
+
+      <!-- Link columns -->
+      {footerSections.map((section) => (
+        <div class="footer-column">
+          <h4 class="footer-column-title caption-mono">{section.title}</h4>
+          <ul class="footer-column-links">
+            {section.links.map((link) => (
+              <li>
+                <a href={link.href} class="footer-link">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copyright">© {new Date().getFullYear()} Mouse DPI Analyzer. Free & open-source.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+    padding: 64px 0 32px;
+    margin-top: 96px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+  }
+
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .footer-tagline {
+    font-size: 14px;
+    color: var(--color-mute);
+    line-height: 22px;
+    margin: 0;
+  }
+
+  .footer-column-title {
+    margin: 0 0 16px;
+    color: var(--color-mute);
+  }
+
+  .footer-column-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-link {
+    font-size: 14px;
+    color: var(--color-body);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-link:hover {
+    color: var(--color-ink);
+  }
+
+  .footer-bottom {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .footer-copyright {
+    font-size: 12px;
+    color: var(--color-mute);
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

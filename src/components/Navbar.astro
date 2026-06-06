@@ -1,0 +1,210 @@
+---
+const currentPath = Astro.url.pathname;
+
+const navLinks = [
+  { label: "Home", href: "/" },
+  { label: "DPI Analyzer", href: "/dpi-analyzer" },
+  { label: "Screen Ruler", href: "/screen-ruler" },
+  { label: "How It Works", href: "/how-it-works" },
+  { label: "FAQ", href: "/faq" },
+];
+---
+
+<nav class="navbar" id="main-nav">
+  <div class="navbar-inner container">
+    <!-- Logo -->
+    <a href="/" class="navbar-logo" id="nav-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="20" height="20" rx="4" fill="#171717"/>
+        <path d="M8 7L8 17M12 10L12 17M16 7L16 17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Mouse DPI Analyzer</span>
+    </a>
+
+    <!-- Desktop Links -->
+    <div class="navbar-links" id="nav-links">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          class:list={["navbar-link", { active: currentPath === link.href || (link.href !== "/" && currentPath.startsWith(link.href)) }]}
+        >
+          {link.label}
+        </a>
+      ))}
+    </div>
+
+    <!-- CTA -->
+    <div class="navbar-cta">
+      <a href="/dpi-analyzer" class="btn btn-primary btn-sm" id="nav-cta">
+        Test DPI
+      </a>
+    </div>
+
+    <!-- Mobile Hamburger -->
+    <button class="navbar-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="navbar-mobile" id="nav-mobile">
+    {navLinks.map((link) => (
+      <a
+        href={link.href}
+        class:list={["navbar-mobile-link", { active: currentPath === link.href }]}
+      >
+        {link.label}
+      </a>
+    ))}
+    <a href="/dpi-analyzer" class="btn btn-primary btn-sm" style="margin-top: 8px; width: 100%;">
+      Test DPI
+    </a>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-bottom: 1px solid var(--color-hairline);
+    height: 64px;
+  }
+
+  .navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    gap: 24px;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.28px;
+    color: var(--color-ink);
+    flex-shrink: 0;
+    text-decoration: none;
+  }
+
+  .navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .navbar-link {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: -0.28px;
+    color: var(--color-body);
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    transition: color 0.15s ease, background 0.15s ease;
+    text-decoration: none;
+  }
+
+  .navbar-link:hover {
+    color: var(--color-ink);
+    background: var(--color-canvas-soft-2);
+  }
+
+  .navbar-link.active {
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+
+  .navbar-cta {
+    flex-shrink: 0;
+  }
+
+  .navbar-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 1001;
+  }
+
+  .navbar-hamburger span {
+    display: block;
+    width: 18px;
+    height: 1.5px;
+    background: var(--color-ink);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .navbar-hamburger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(4px, 4px);
+  }
+
+  .navbar-hamburger.open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .navbar-hamburger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  .navbar-mobile {
+    display: none;
+    flex-direction: column;
+    padding: 16px 24px 24px;
+    background: var(--color-canvas);
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .navbar-mobile.open {
+    display: flex;
+  }
+
+  .navbar-mobile-link {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--color-body);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-hairline);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .navbar-mobile-link:hover,
+  .navbar-mobile-link.active {
+    color: var(--color-ink);
+  }
+
+  @media (max-width: 768px) {
+    .navbar-links,
+    .navbar-cta {
+      display: none;
+    }
+
+    .navbar-hamburger {
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  const hamburger = document.getElementById("nav-hamburger");
+  const mobileMenu = document.getElementById("nav-mobile");
+
+  hamburger?.addEventListener("click", () => {
+    hamburger.classList.toggle("open");
+    mobileMenu?.classList.toggle("open");
+  });
+</script>

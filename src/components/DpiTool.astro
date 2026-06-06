@@ -1,0 +1,897 @@
+---
+// DpiTool.astro — Core DPI measurement engine
+// Uses Pointer Lock API for accurate, unaccelerated mouse movement tracking
+---
+
+<section class="dpi-tool" id="dpi-tool">
+  <div class="tool-layout">
+    <!-- Settings Panel -->
+    <div class="tool-settings card" id="settings-panel">
+      <h3 class="display-sm" style="margin: 0 0 20px;">Settings</h3>
+
+      <div class="setting-group">
+        <label class="setting-label body-sm">Target Distance</label>
+        <div class="setting-row">
+          <input
+            type="number"
+            class="input"
+            id="target-distance"
+            value="2"
+            min="0.5"
+            max="20"
+            step="0.5"
+          />
+          <div class="unit-toggle" id="unit-toggle">
+            <button class="unit-btn active" data-unit="inch" id="unit-inch">in</button>
+            <button class="unit-btn" data-unit="cm" id="unit-cm">cm</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label body-sm">Configured DPI <span class="optional">(optional)</span></label>
+        <input
+          type="number"
+          class="input"
+          id="configured-dpi"
+          placeholder="e.g. 800"
+          min="100"
+          max="32000"
+          step="50"
+        />
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label body-sm">Axis</label>
+        <div class="unit-toggle" id="axis-toggle">
+          <button class="unit-btn active" data-axis="x" id="axis-x">Horizontal</button>
+          <button class="unit-btn" data-axis="y" id="axis-y">Vertical</button>
+        </div>
+      </div>
+
+      <button class="btn btn-secondary btn-sm" id="reset-btn" style="width: 100%; margin-top: 12px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"></polyline>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg>
+        Reset
+      </button>
+
+      <!-- Instructions -->
+      <div class="instructions card-soft" style="margin-top: 20px; padding: 16px;">
+        <p class="caption-mono" style="margin: 0 0 8px; color: var(--color-mute);">How to test</p>
+        <ol class="instruction-list body-sm">
+          <li>Set your target distance</li>
+          <li>Click the test area to lock cursor</li>
+          <li>Move your mouse the target distance</li>
+          <li>Press <kbd>Esc</kbd> or click to release</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Test Area -->
+    <div class="tool-test-wrapper">
+      <div class="test-area card" id="test-area">
+        <div class="test-area-inner" id="test-area-inner">
+          <!-- Crosshair -->
+          <div class="crosshair" id="crosshair">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" stroke="var(--color-hairline)" stroke-width="1" stroke-dasharray="4 4"/>
+              <line x1="20" y1="4" x2="20" y2="16" stroke="var(--color-ink)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="24" x2="20" y2="36" stroke="var(--color-ink)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="4" y1="20" x2="16" y2="20" stroke="var(--color-ink)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="24" y1="20" x2="36" y2="20" stroke="var(--color-ink)" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="20" cy="20" r="2" fill="var(--color-link)"/>
+            </svg>
+          </div>
+
+          <!-- State overlay -->
+          <div class="test-overlay" id="test-overlay">
+            <div class="test-prompt">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 3l14 9-14 9V3z"></path>
+              </svg>
+              <span class="body-md" style="font-weight: 500;">Click to start measuring</span>
+              <span class="body-sm" style="color: var(--color-mute);">Cursor will be locked for accurate tracking</span>
+            </div>
+          </div>
+
+          <!-- Active state info -->
+          <div class="test-active-info" id="test-active-info" style="display: none;">
+            <div class="live-counter">
+              <span class="caption-mono" style="color: var(--color-mute);">Pixels moved</span>
+              <span class="live-pixels display-lg" id="live-pixels">0</span>
+            </div>
+            <div class="live-direction" id="live-direction">
+              <div class="direction-bar">
+                <div class="direction-fill" id="direction-fill"></div>
+              </div>
+              <span class="caption-mono" id="direction-label" style="color: var(--color-mute);">Move mouse →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gradient border animation -->
+        <div class="test-area-border" id="test-area-border"></div>
+      </div>
+
+      <!-- Real-time stats bar -->
+      <div class="live-stats" id="live-stats">
+        <div class="live-stat">
+          <span class="caption-mono">PIXELS</span>
+          <span class="stat-value code-text" id="stat-pixels">0</span>
+        </div>
+        <div class="live-stat-divider"></div>
+        <div class="live-stat">
+          <span class="caption-mono">DISTANCE</span>
+          <span class="stat-value code-text" id="stat-distance">0.00 in</span>
+        </div>
+        <div class="live-stat-divider"></div>
+        <div class="live-stat">
+          <span class="caption-mono">DPI</span>
+          <span class="stat-value code-text" id="stat-dpi">—</span>
+        </div>
+        <div class="live-stat-divider"></div>
+        <div class="live-stat">
+          <span class="caption-mono">STATUS</span>
+          <span class="stat-value stat-status code-text" id="stat-status">Ready</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="tool-results card" id="results-panel">
+      <h3 class="display-sm" style="margin: 0 0 20px;">Results</h3>
+
+      <!-- Main DPI result -->
+      <div class="result-main" id="result-main">
+        <span class="caption-mono" style="color: var(--color-mute);">Measured DPI</span>
+        <span class="result-dpi display-xl" id="result-dpi">—</span>
+      </div>
+
+      <!-- Comparison -->
+      <div class="result-comparison" id="result-comparison" style="display: none;">
+        <div class="comparison-bar">
+          <div class="comparison-configured">
+            <span class="body-sm" style="font-weight: 500;">Configured</span>
+            <span class="code-text" id="comparison-configured-val">—</span>
+          </div>
+          <div class="comparison-vs body-sm" style="color: var(--color-mute);">vs</div>
+          <div class="comparison-measured">
+            <span class="body-sm" style="font-weight: 500;">Measured</span>
+            <span class="code-text" id="comparison-measured-val">—</span>
+          </div>
+        </div>
+        <div class="comparison-diff" id="comparison-diff"></div>
+      </div>
+
+      <!-- Details -->
+      <div class="result-details" id="result-details" style="display: none;">
+        <div class="detail-row">
+          <span class="body-sm" style="color: var(--color-body);">Pixels moved</span>
+          <span class="code-text" id="detail-pixels">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="body-sm" style="color: var(--color-body);">Target distance</span>
+          <span class="code-text" id="detail-distance">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="body-sm" style="color: var(--color-body);">Axis</span>
+          <span class="code-text" id="detail-axis">—</span>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="result-history" id="result-history">
+        <h4 class="caption-mono" style="margin: 24px 0 12px; color: var(--color-mute);">Test History</h4>
+        <div class="history-empty body-sm" id="history-empty" style="color: var(--color-mute);">
+          No tests yet. Click the test area to begin.
+        </div>
+        <div class="history-list" id="history-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dpi-tool {
+    width: 100%;
+  }
+
+  .tool-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 280px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* Settings */
+  .tool-settings {
+    padding: 24px;
+    position: sticky;
+    top: 84px;
+  }
+
+  .setting-group {
+    margin-bottom: 16px;
+  }
+
+  .setting-label {
+    display: block;
+    color: var(--color-body);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .optional {
+    color: var(--color-mute);
+    font-weight: 400;
+  }
+
+  .setting-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .setting-row .input {
+    flex: 1;
+  }
+
+  .unit-toggle {
+    display: flex;
+    background: var(--color-canvas-soft-2);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .unit-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    color: var(--color-body);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .unit-btn.active {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .instruction-list {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--color-body);
+  }
+
+  .instruction-list li {
+    margin-bottom: 4px;
+  }
+
+  .instruction-list kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: 4px;
+    box-shadow: 0 1px 0 var(--color-hairline);
+  }
+
+  /* Test Area */
+  .tool-test-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .test-area {
+    position: relative;
+    min-height: 420px;
+    cursor: crosshair;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .test-area-inner {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: 
+      linear-gradient(var(--color-hairline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-hairline) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center;
+  }
+
+  .crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+  }
+
+  .test-area:hover .crosshair {
+    opacity: 0.7;
+  }
+
+  .test-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: opacity 0.3s ease;
+  }
+
+  .test-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-ink);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 32px 48px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-hairline);
+  }
+
+  .test-active-info {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .live-counter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .live-pixels {
+    color: var(--color-link);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .direction-bar {
+    width: 200px;
+    height: 4px;
+    background: var(--color-canvas-soft-2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .direction-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-grad-develop-start), var(--color-grad-develop-end));
+    border-radius: 2px;
+    transition: width 0.1s ease;
+  }
+
+  .live-direction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .test-area-border {
+    position: absolute;
+    inset: -2px;
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+  }
+
+  .test-area.active .test-area-border {
+    opacity: 1;
+    background: linear-gradient(135deg, 
+      var(--color-grad-develop-start), 
+      var(--color-grad-develop-end),
+      var(--color-grad-preview-start),
+      var(--color-grad-preview-end)
+    );
+    animation: border-rotate 4s linear infinite;
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    padding: 2px;
+  }
+
+  @keyframes border-rotate {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+
+  .test-area.active {
+    cursor: none;
+  }
+
+  .test-area.active .test-overlay {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Live stats bar */
+  .live-stats {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--color-ink);
+    color: var(--color-on-primary);
+    border-radius: var(--radius-md);
+    padding: 12px 20px;
+    overflow-x: auto;
+  }
+
+  .live-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .live-stat .caption-mono {
+    color: var(--color-hairline-strong);
+    font-size: 10px;
+  }
+
+  .stat-value {
+    color: var(--color-on-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-status {
+    color: var(--color-cyan);
+  }
+
+  .live-stat-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 16px;
+    flex-shrink: 0;
+  }
+
+  /* Results */
+  .tool-results {
+    padding: 24px;
+    position: sticky;
+    top: 84px;
+  }
+
+  .result-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .result-dpi {
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease;
+  }
+
+  .result-dpi.success {
+    color: var(--color-success);
+  }
+
+  .result-comparison {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .comparison-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .comparison-configured,
+  .comparison-measured {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .comparison-diff {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: var(--font-mono);
+    text-align: center;
+  }
+
+  .comparison-diff.match {
+    background: rgba(0, 112, 243, 0.08);
+    color: var(--color-link);
+  }
+
+  .comparison-diff.off {
+    background: rgba(245, 166, 35, 0.08);
+    color: var(--color-warning);
+  }
+
+  .result-details {
+    padding: 16px 0;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: var(--color-canvas-soft);
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    font-family: var(--font-mono);
+  }
+
+  .history-item-dpi {
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .history-item-meta {
+    color: var(--color-mute);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .tool-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .tool-settings,
+    .tool-results {
+      position: static;
+    }
+
+    .tool-settings {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+    }
+
+    .tool-settings h3 {
+      grid-column: 1 / -1;
+    }
+
+    .tool-settings .instructions {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .tool-settings {
+      grid-template-columns: 1fr;
+    }
+
+    .test-area-inner {
+      height: 300px;
+    }
+
+    .live-stats {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .live-stat-divider {
+      display: none;
+    }
+
+    .live-stat {
+      min-width: 40%;
+      flex: unset;
+    }
+  }
+</style>
+
+<script>
+  // ─── DPI Measurement Engine ───
+  const testArea = document.getElementById("test-area") as HTMLElement;
+  const testOverlay = document.getElementById("test-overlay") as HTMLElement;
+  const testActiveInfo = document.getElementById("test-active-info") as HTMLElement;
+  const livePixels = document.getElementById("live-pixels") as HTMLElement;
+  const directionFill = document.getElementById("direction-fill") as HTMLElement;
+  const directionLabel = document.getElementById("direction-label") as HTMLElement;
+
+  // Stats
+  const statPixels = document.getElementById("stat-pixels") as HTMLElement;
+  const statDistance = document.getElementById("stat-distance") as HTMLElement;
+  const statDpi = document.getElementById("stat-dpi") as HTMLElement;
+  const statStatus = document.getElementById("stat-status") as HTMLElement;
+
+  // Results
+  const resultDpi = document.getElementById("result-dpi") as HTMLElement;
+  const resultComparison = document.getElementById("result-comparison") as HTMLElement;
+  const comparisonConfiguredVal = document.getElementById("comparison-configured-val") as HTMLElement;
+  const comparisonMeasuredVal = document.getElementById("comparison-measured-val") as HTMLElement;
+  const comparisonDiff = document.getElementById("comparison-diff") as HTMLElement;
+  const resultDetails = document.getElementById("result-details") as HTMLElement;
+  const detailPixels = document.getElementById("detail-pixels") as HTMLElement;
+  const detailDistance = document.getElementById("detail-distance") as HTMLElement;
+  const detailAxis = document.getElementById("detail-axis") as HTMLElement;
+  const historyEmpty = document.getElementById("history-empty") as HTMLElement;
+  const historyList = document.getElementById("history-list") as HTMLElement;
+
+  // Settings
+  const targetDistanceInput = document.getElementById("target-distance") as HTMLInputElement;
+  const configuredDpiInput = document.getElementById("configured-dpi") as HTMLInputElement;
+  const resetBtn = document.getElementById("reset-btn") as HTMLButtonElement;
+
+  // State
+  let isActive = false;
+  let totalDeltaX = 0;
+  let totalDeltaY = 0;
+  let currentUnit: "inch" | "cm" = "inch";
+  let currentAxis: "x" | "y" = "x";
+  let history: Array<{ dpi: number; pixels: number; distance: string; axis: string; time: string }> = [];
+
+  // Unit toggle
+  document.querySelectorAll("#unit-toggle .unit-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#unit-toggle .unit-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentUnit = (btn as HTMLElement).dataset.unit as "inch" | "cm";
+      updateLiveStats();
+    });
+  });
+
+  // Axis toggle
+  document.querySelectorAll("#axis-toggle .unit-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#axis-toggle .unit-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentAxis = (btn as HTMLElement).dataset.axis as "x" | "y";
+      if (directionLabel) {
+        directionLabel.textContent = currentAxis === "x" ? "Move mouse →" : "Move mouse ↓";
+      }
+    });
+  });
+
+  // Get target distance in inches
+  function getTargetInches(): number {
+    const val = parseFloat(targetDistanceInput.value) || 2;
+    return currentUnit === "cm" ? val / 2.54 : val;
+  }
+
+  function getTargetDisplay(): string {
+    const val = parseFloat(targetDistanceInput.value) || 2;
+    return `${val} ${currentUnit === "cm" ? "cm" : "in"}`;
+  }
+
+  // Get pixels moved along active axis
+  function getAxisPixels(): number {
+    return Math.abs(currentAxis === "x" ? totalDeltaX : totalDeltaY);
+  }
+
+  // Calculate DPI
+  function calculateDpi(): number {
+    const pixels = getAxisPixels();
+    const inches = getTargetInches();
+    if (inches <= 0) return 0;
+    return Math.round(pixels / inches);
+  }
+
+  // Update live stats
+  function updateLiveStats() {
+    const pixels = getAxisPixels();
+    const dpi = calculateDpi();
+    const targetInches = getTargetInches();
+    const distanceInInches = targetInches > 0 ? pixels / (dpi || 1) : 0;
+
+    if (livePixels) livePixels.textContent = String(pixels);
+    if (statPixels) statPixels.textContent = String(pixels);
+    if (statDistance) statDistance.textContent = `${getTargetDisplay()}`;
+    if (statDpi) statDpi.textContent = isActive && pixels > 10 ? String(dpi) : "—";
+
+    // Direction fill progress (visual feedback)
+    if (directionFill) {
+      // Estimate progress — rough pixels/inch * target
+      const estimatedTotalPixels = 96 * targetInches; // 96 is a rough screen PPI
+      const progress = Math.min((pixels / estimatedTotalPixels) * 100, 100);
+      directionFill.style.width = `${progress}%`;
+    }
+  }
+
+  // Start test
+  function startTest() {
+    if (isActive) return;
+
+    testArea.requestPointerLock();
+  }
+
+  // Handle pointer lock change
+  document.addEventListener("pointerlockchange", () => {
+    if (document.pointerLockElement === testArea) {
+      // Locked — start tracking
+      isActive = true;
+      totalDeltaX = 0;
+      totalDeltaY = 0;
+      testArea.classList.add("active");
+      if (testActiveInfo) testActiveInfo.style.display = "flex";
+      if (statStatus) {
+        statStatus.textContent = "Measuring...";
+        statStatus.style.color = "var(--color-cyan)";
+      }
+      updateLiveStats();
+      document.addEventListener("mousemove", onMouseMove);
+    } else {
+      // Unlocked — finalize
+      isActive = false;
+      testArea.classList.remove("active");
+      if (testActiveInfo) testActiveInfo.style.display = "none";
+      document.removeEventListener("mousemove", onMouseMove);
+      finishTest();
+    }
+  });
+
+  function onMouseMove(e: MouseEvent) {
+    totalDeltaX += e.movementX;
+    totalDeltaY += e.movementY;
+    updateLiveStats();
+  }
+
+  function finishTest() {
+    const pixels = getAxisPixels();
+    if (pixels < 10) {
+      if (statStatus) {
+        statStatus.textContent = "Too short";
+        statStatus.style.color = "var(--color-warning)";
+      }
+      return;
+    }
+
+    const dpi = calculateDpi();
+
+    // Update results
+    if (resultDpi) {
+      resultDpi.textContent = String(dpi);
+      resultDpi.classList.add("success");
+      setTimeout(() => resultDpi.classList.remove("success"), 2000);
+    }
+
+    if (statStatus) {
+      statStatus.textContent = "Complete";
+      statStatus.style.color = "#50e3c2";
+    }
+
+    if (statDpi) statDpi.textContent = String(dpi);
+
+    // Details
+    if (resultDetails) resultDetails.style.display = "block";
+    if (detailPixels) detailPixels.textContent = String(pixels);
+    if (detailDistance) detailDistance.textContent = getTargetDisplay();
+    if (detailAxis) detailAxis.textContent = currentAxis === "x" ? "Horizontal" : "Vertical";
+
+    // Comparison
+    const configuredDpi = parseInt(configuredDpiInput.value);
+    if (configuredDpi > 0 && resultComparison) {
+      resultComparison.style.display = "block";
+      if (comparisonConfiguredVal) comparisonConfiguredVal.textContent = String(configuredDpi);
+      if (comparisonMeasuredVal) comparisonMeasuredVal.textContent = String(dpi);
+
+      const diff = dpi - configuredDpi;
+      const pctDiff = ((diff / configuredDpi) * 100).toFixed(1);
+
+      if (comparisonDiff) {
+        if (Math.abs(parseFloat(pctDiff)) < 5) {
+          comparisonDiff.className = "comparison-diff match";
+          comparisonDiff.textContent = `✓ Match — ${pctDiff}% difference`;
+        } else {
+          comparisonDiff.className = "comparison-diff off";
+          comparisonDiff.textContent = `${diff > 0 ? "+" : ""}${pctDiff}% difference (${diff > 0 ? "+" : ""}${diff} DPI)`;
+        }
+      }
+    }
+
+    // History
+    const entry = {
+      dpi,
+      pixels,
+      distance: getTargetDisplay(),
+      axis: currentAxis === "x" ? "H" : "V",
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+    };
+    history.unshift(entry);
+
+    if (historyEmpty) historyEmpty.style.display = "none";
+    if (historyList) {
+      const item = document.createElement("div");
+      item.className = "history-item";
+      item.innerHTML = `
+        <span class="history-item-dpi">${entry.dpi} DPI</span>
+        <span class="history-item-meta">${entry.pixels}px · ${entry.distance} · ${entry.axis} · ${entry.time}</span>
+      `;
+      historyList.prepend(item);
+    }
+  }
+
+  // Click to start
+  testArea.addEventListener("click", () => {
+    if (!isActive) {
+      startTest();
+    }
+  });
+
+  // Reset
+  resetBtn.addEventListener("click", () => {
+    totalDeltaX = 0;
+    totalDeltaY = 0;
+    history = [];
+
+    if (resultDpi) resultDpi.textContent = "—";
+    if (resultComparison) resultComparison.style.display = "none";
+    if (resultDetails) resultDetails.style.display = "none";
+    if (statPixels) statPixels.textContent = "0";
+    if (statDpi) statDpi.textContent = "—";
+    if (statStatus) {
+      statStatus.textContent = "Ready";
+      statStatus.style.color = "var(--color-cyan)";
+    }
+    if (historyEmpty) historyEmpty.style.display = "block";
+    if (historyList) historyList.innerHTML = "";
+    if (livePixels) livePixels.textContent = "0";
+    if (directionFill) directionFill.style.width = "0%";
+  });
+
+  // Keyboard shortcut: Space to start
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !isActive && document.activeElement === document.body) {
+      e.preventDefault();
+      startTest();
+    }
+  });
+</script>

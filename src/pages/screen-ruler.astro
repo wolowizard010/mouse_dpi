@@ -1,0 +1,88 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import ScreenRuler from "../components/ScreenRuler.astro";
+---
+
+<Layout
+  title="On-Screen Ruler — Measure in CM and Inches | Mouse DPI Analyzer"
+  description="Free on-screen ruler with screen calibration. Measure accurately in centimeters and inches using credit card calibration. No physical ruler needed."
+>
+  <Navbar />
+
+  <main class="ruler-page">
+    <div class="container">
+      <div class="page-header">
+        <span class="caption-mono" style="color: var(--color-mute);">Tool</span>
+        <h1 class="display-lg" style="margin: 8px 0 0;">Screen Ruler.</h1>
+        <p class="body-lg" style="color: var(--color-body); margin: 8px 0 0; max-width: 560px;">
+          An accurate on-screen ruler for your display. Calibrate using a credit card or by entering your screen specifications for precise real-world measurements.
+        </p>
+      </div>
+
+      <ScreenRuler />
+
+      <!-- Info section -->
+      <div class="info-section" style="margin-top: 64px;">
+        <div class="section-header">
+          <span class="caption-mono" style="color: var(--color-mute);">About</span>
+          <h2 class="display-md" style="margin: 8px 0 0;">Why calibrate your screen?</h2>
+        </div>
+
+        <div class="info-grid" style="margin-top: 32px;">
+          <div class="card info-card">
+            <h3 class="display-sm" style="margin: 0 0 12px;">Every screen is different.</h3>
+            <p class="body-md" style="color: var(--color-body); margin: 0;">
+              A "15.6 inch" laptop and a "27 inch" monitor display pixels at completely different physical sizes. The same 100 pixels might be 1 inch on one screen and 0.7 inches on another. Calibration accounts for your specific display's pixel density (PPI).
+            </p>
+          </div>
+          <div class="card info-card">
+            <h3 class="display-sm" style="margin: 0 0 12px;">Credit card calibration.</h3>
+            <p class="body-md" style="color: var(--color-body); margin: 0;">
+              ISO/IEC 7810 defines a standard credit card at 85.6 × 53.98 mm. Since nearly everyone has a card handy, we use this as a physical reference. Adjust the slider until the on-screen line matches your card's width, and your PPI is automatically calculated.
+            </p>
+          </div>
+          <div class="card info-card">
+            <h3 class="display-sm" style="margin: 0 0 12px;">Your settings are saved.</h3>
+            <p class="body-md" style="color: var(--color-body); margin: 0;">
+              Once calibrated, your screen's PPI is stored in your browser's localStorage. The ruler and DPI analyzer will use your calibrated value automatically on every visit — no need to re-calibrate.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .ruler-page {
+    padding: 48px 0 0;
+  }
+
+  .page-header {
+    margin-bottom: 40px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .info-card {
+    padding: 32px;
+  }
+
+  @media (max-width: 768px) {
+    .ruler-page {
+      padding: 32px 0 0;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
