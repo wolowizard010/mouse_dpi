@@ -7,7 +7,7 @@ import ScreenRuler from "../components/ScreenRuler.astro";
 
 <Layout
   title="On-Screen Ruler — Measure in CM and Inches | Mouse DPI Analyzer"
-  description="Free on-screen ruler with screen calibration. Measure accurately in centimeters and inches using credit card calibration. No physical ruler needed."
+  description="Free on-screen ruler with screen calibration. Measure accurately in centimeters and inches using monitor specification calibration. No physical ruler needed."
 >
   <Navbar />
 
@@ -17,7 +17,7 @@ import ScreenRuler from "../components/ScreenRuler.astro";
         <span class="caption-mono" style="color: var(--color-mute);">Tool</span>
         <h1 class="display-lg" style="margin: 8px 0 0;">Screen Ruler.</h1>
         <p class="body-lg" style="color: var(--color-body); margin: 8px 0 0; max-width: 560px;">
-          An accurate on-screen ruler for your display. Calibrate using a credit card or by entering your screen specifications for precise real-world measurements.
+          An accurate on-screen ruler for your display. Calibrate by entering your screen specifications for precise real-world measurements.
         </p>
       </div>
 
@@ -38,9 +38,9 @@ import ScreenRuler from "../components/ScreenRuler.astro";
             </p>
           </div>
           <div class="card info-card">
-            <h3 class="display-sm" style="margin: 0 0 12px;">Credit card calibration.</h3>
+            <h3 class="display-sm" style="margin: 0 0 12px;">Screen specification calibration.</h3>
             <p class="body-md" style="color: var(--color-body); margin: 0;">
-              ISO/IEC 7810 defines a standard credit card at 85.6 × 53.98 mm. Since nearly everyone has a card handy, we use this as a physical reference. Adjust the slider until the on-screen line matches your card's width, and your PPI is automatically calculated.
+              Enter your monitor's diagonal size (e.g., 27") and its native resolution (e.g., 2560×1440). From these two values, we calculate your exact PPI — pixels per physical inch — so the ruler matches the real world.
             </p>
           </div>
           <div class="card info-card">

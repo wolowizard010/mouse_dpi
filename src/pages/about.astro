@@ -35,27 +35,8 @@ import Footer from "../components/Footer.astro";
             </p>
           </section>
 
-          <section class="content-section">
-            <h2 class="display-md">Technical stack.</h2>
-            <div class="tech-grid">
-              <div class="card-soft tech-item">
-                <span class="code-text" style="color: var(--color-link);">Astro</span>
-                <span class="body-sm" style="color: var(--color-body);">Static site generator for fast, SEO-optimized multi-page architecture</span>
-              </div>
-              <div class="card-soft tech-item">
-                <span class="code-text" style="color: var(--color-violet);">Pointer Lock API</span>
-                <span class="body-sm" style="color: var(--color-body);">Raw mouse movement capture bypassing OS acceleration</span>
-              </div>
-              <div class="card-soft tech-item">
-                <span class="code-text" style="color: var(--color-cyan);">Canvas API</span>
-                <span class="body-sm" style="color: var(--color-body);">High-DPI ruler rendering with precise tick marks</span>
-              </div>
-              <div class="card-soft tech-item">
-                <span class="code-text" style="color: var(--color-highlight-pink);">Tailwind CSS v4</span>
-                <span class="body-sm" style="color: var(--color-body);">Modern utility-first CSS framework for consistent design</span>
-              </div>
-            </div>
-          </section>
+
+
 
           <section class="content-section">
             <h2 class="display-md">Privacy.</h2>
@@ -72,19 +53,15 @@ import Footer from "../components/Footer.astro";
             <div class="browser-list">
               <div class="browser-item">
                 <span class="body-sm" style="font-weight: 500;">Chrome</span>
-                <span class="badge">37+</span>
               </div>
               <div class="browser-item">
                 <span class="body-sm" style="font-weight: 500;">Firefox</span>
-                <span class="badge">50+</span>
               </div>
               <div class="browser-item">
                 <span class="body-sm" style="font-weight: 500;">Edge</span>
-                <span class="badge">13+</span>
               </div>
               <div class="browser-item">
                 <span class="body-sm" style="font-weight: 500;">Safari</span>
-                <span class="badge">10.1+</span>
               </div>
             </div>
           </section>
@@ -133,19 +110,7 @@ import Footer from "../components/Footer.astro";
     margin: 0 0 16px;
   }
 
-  .tech-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-top: 16px;
-  }
 
-  .tech-item {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
 
   .browser-list {
     display: flex;
@@ -162,10 +127,5 @@ import Footer from "../components/Footer.astro";
     background: var(--color-canvas-soft);
     border-radius: var(--radius-sm);
   }
-
-  @media (max-width: 768px) {
-    .tech-grid {
-      grid-template-columns: 1fr;
-    }
-  }
 </style>
+

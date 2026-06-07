@@ -16,13 +16,13 @@
             type="number"
             class="input"
             id="target-distance"
-            value="2"
+            value="5"
             min="0.5"
             max="20"
             step="0.5"
           />
           <div class="unit-toggle" id="unit-toggle">
-            <button class="unit-btn active" data-unit="inch" id="unit-inch">in</button>
+            <button class="unit-btn active" data-unit="inch" id="unit-inch">inch</button>
             <button class="unit-btn" data-unit="cm" id="unit-cm">cm</button>
           </div>
         </div>
@@ -64,7 +64,7 @@
           <li>Set your target distance</li>
           <li>Click the test area to lock cursor</li>
           <li>Move your mouse the target distance</li>
-          <li>Press <kbd>Esc</kbd> or click to release</li>
+          <li>Click again to finish measuring</li>
         </ol>
       </div>
     </div>
@@ -247,8 +247,10 @@
 
   .unit-btn {
     font-family: var(--font-mono);
-    font-size: 12px;
-    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 7px 14px;
     border: none;
     background: transparent;
     color: var(--color-body);
@@ -259,8 +261,8 @@
   }
 
   .unit-btn.active {
-    background: var(--color-canvas);
-    color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-on-primary);
     box-shadow: var(--shadow-sm);
   }
 
@@ -343,7 +345,7 @@
     align-items: center;
     gap: 8px;
     color: var(--color-ink);
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--c-overlay);
     backdrop-filter: blur(8px);
     padding: 32px 48px;
     border-radius: var(--radius-lg);
@@ -703,12 +705,12 @@
 
   // Get target distance in inches
   function getTargetInches(): number {
-    const val = parseFloat(targetDistanceInput.value) || 2;
+    const val = parseFloat(targetDistanceInput.value) || 5;
     return currentUnit === "cm" ? val / 2.54 : val;
   }
 
   function getTargetDisplay(): string {
-    const val = parseFloat(targetDistanceInput.value) || 2;
+    const val = parseFloat(targetDistanceInput.value) || 5;
     return `${val} ${currentUnit === "cm" ? "cm" : "in"}`;
   }
 
@@ -768,12 +770,14 @@
       }
       updateLiveStats();
       document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mousedown", onMouseDown);
     } else {
       // Unlocked — finalize
       isActive = false;
       testArea.classList.remove("active");
       if (testActiveInfo) testActiveInfo.style.display = "none";
       document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mousedown", onMouseDown);
       finishTest();
     }
   });
@@ -782,6 +786,13 @@
     totalDeltaX += e.movementX;
     totalDeltaY += e.movementY;
     updateLiveStats();
+  }
+
+  function onMouseDown(e: MouseEvent) {
+    if (e.button === 0 && isActive) {
+      e.preventDefault();
+      document.exitPointerLock();
+    }
   }
 
   function finishTest() {

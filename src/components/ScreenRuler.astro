@@ -1,86 +1,63 @@
 ---
-// ScreenRuler.astro — On-screen ruler with calibration
-// Uses credit-card calibration or manual screen-size entry for accurate PPI
+// ScreenRuler.astro — On-screen ruler with manual screen calibration
+// Uses screen diagonal + resolution for accurate PPI calculation
 ---
 
 <section class="ruler-section" id="screen-ruler">
   <div class="ruler-controls card" id="ruler-controls">
     <h3 class="display-sm" style="margin: 0 0 16px;">Calibration</h3>
     <p class="body-sm" style="color: var(--color-body); margin: 0 0 16px;">
-      Calibrate your screen for accurate measurements. Choose a method below.
+      Enter your screen specifications for accurate measurements.
     </p>
 
-    <!-- Calibration method tabs -->
-    <div class="calibration-tabs">
-      <button class="unit-btn active" data-method="card" id="cal-method-card">Credit Card</button>
-      <button class="unit-btn" data-method="manual" id="cal-method-manual">Manual Entry</button>
-    </div>
-
-    <!-- Credit card calibration -->
-    <div class="calibration-panel" id="cal-panel-card">
-      <p class="body-sm" style="color: var(--color-body); margin: 8px 0 12px;">
-        Place a standard credit card (85.6mm) against the line below and adjust the slider until they match.
+    <!-- Detection banner -->
+    <div class="detect-banner" id="detect-banner">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <span class="body-sm" style="color: var(--color-body);">Resolution detected</span>
+        <span class="caption-mono" id="detected-res-label" style="color: var(--color-mute);"></span>
+      </div>
+      <p class="body-sm" style="color: var(--color-mute); margin: 6px 0 0; font-size: 11px;">
+        Resolution auto-filled. Enter your screen diagonal to calibrate.
       </p>
-      <div class="card-calibration-visual" id="card-calibration-visual">
-        <div class="card-line" id="card-line">
-          <div class="card-line-inner"></div>
-          <span class="card-line-label code-text">85.6 mm</span>
-        </div>
-      </div>
-      <div class="slider-group">
-        <label class="caption-mono" style="color: var(--color-mute);">Adjust size</label>
-        <input
-          type="range"
-          class="calibration-slider"
-          id="calibration-slider"
-          min="60"
-          max="200"
-          value="96"
-          step="0.5"
-        />
-        <span class="code-text" id="ppi-display">96 PPI</span>
-      </div>
     </div>
 
-    <!-- Manual calibration -->
-    <div class="calibration-panel" id="cal-panel-manual" style="display: none;">
-      <div class="manual-fields">
-        <div class="setting-group">
-          <label class="setting-label body-sm">Screen diagonal (inches)</label>
+    <!-- Manual calibration fields -->
+    <div class="manual-fields">
+      <div class="setting-group">
+        <label class="setting-label body-sm">Screen diagonal (inches)</label>
+        <input
+          type="number"
+          class="input"
+          id="screen-diagonal"
+          placeholder="e.g. 15.6"
+          min="5"
+          max="50"
+          step="0.1"
+        />
+      </div>
+      <div class="setting-group">
+        <label class="setting-label body-sm">Resolution</label>
+        <div class="resolution-inputs">
           <input
             type="number"
             class="input"
-            id="screen-diagonal"
-            placeholder="e.g. 15.6"
-            min="5"
-            max="50"
-            step="0.1"
+            id="screen-width"
+            placeholder="1920"
+            min="320"
+            max="7680"
+          />
+          <span class="body-sm" style="color: var(--color-mute);">×</span>
+          <input
+            type="number"
+            class="input"
+            id="screen-height"
+            placeholder="1080"
+            min="200"
+            max="4320"
           />
         </div>
-        <div class="setting-group">
-          <label class="setting-label body-sm">Resolution</label>
-          <div class="resolution-inputs">
-            <input
-              type="number"
-              class="input"
-              id="screen-width"
-              placeholder="1920"
-              min="320"
-              max="7680"
-            />
-            <span class="body-sm" style="color: var(--color-mute);">×</span>
-            <input
-              type="number"
-              class="input"
-              id="screen-height"
-              placeholder="1080"
-              min="200"
-              max="4320"
-            />
-          </div>
-        </div>
-        <button class="btn btn-primary btn-sm" id="calc-ppi-btn" style="width: 100%;">Calculate PPI</button>
       </div>
+      <button class="btn btn-primary btn-sm" id="calc-ppi-btn" style="width: 100%;">Calculate PPI</button>
     </div>
 
     <!-- Unit toggle -->
@@ -106,7 +83,7 @@
     </div>
     <div class="ruler-info">
       <span class="caption-mono" style="color: var(--color-mute);">
-        Drag the ruler edges to resize · Use calibration for accuracy
+        Use calibration for accurate real-world measurements
       </span>
     </div>
   </div>
@@ -126,84 +103,18 @@
     top: 84px;
   }
 
-  .calibration-tabs {
-    display: flex;
-    background: var(--color-canvas-soft-2);
-    border-radius: var(--radius-sm);
-    padding: 2px;
-    gap: 2px;
-    margin-bottom: 16px;
-  }
-
-  .calibration-tabs .unit-btn {
-    flex: 1;
-  }
-
-  .calibration-panel {
-    padding: 0;
-  }
-
-  .card-calibration-visual {
+  .detect-banner {
     background: var(--color-canvas-soft);
+    border: 1px solid var(--color-hairline);
     border-radius: var(--radius-sm);
-    padding: 20px;
+    padding: 10px 12px;
     margin-bottom: 16px;
-  }
-
-  .card-line {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .card-line-inner {
-    height: 4px;
-    background: linear-gradient(90deg, var(--color-grad-develop-start), var(--color-grad-develop-end));
-    border-radius: 2px;
-    transition: width 0.1s ease;
-  }
-
-  .card-line-label {
-    white-space: nowrap;
-    color: var(--color-body);
-  }
-
-  .slider-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .calibration-slider {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 4px;
-    background: var(--color-hairline);
-    border-radius: 2px;
-    outline: none;
-  }
-
-  .calibration-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: var(--color-ink);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-  }
-
-  .calibration-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
   }
 
   .manual-fields {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-top: 8px;
   }
 
   .resolution-inputs {
@@ -271,6 +182,36 @@
     font-weight: 500;
   }
 
+  /* Unit toggle — prominent */
+  .unit-toggle {
+    display: flex;
+    background: var(--color-canvas-soft-2);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .unit-btn {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 7px 14px;
+    border: none;
+    background: transparent;
+    color: var(--color-body);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .unit-btn.active {
+    background: var(--color-ink);
+    color: var(--color-on-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
   @media (max-width: 768px) {
     .ruler-section {
       grid-template-columns: 1fr;
@@ -286,36 +227,38 @@
   // ─── Screen Ruler Engine ───
   const canvas = document.getElementById("ruler-canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d")!;
-  const calibrationSlider = document.getElementById("calibration-slider") as HTMLInputElement;
-  const ppiDisplay = document.getElementById("ppi-display") as HTMLElement;
-  const cardLineInner = document.querySelector(".card-line-inner") as HTMLElement;
   const statusDot = document.getElementById("status-dot") as HTMLElement;
   const statusText = document.getElementById("calibration-status-text") as HTMLElement;
   const calcPpiBtn = document.getElementById("calc-ppi-btn") as HTMLButtonElement;
 
-  let currentPPI = 96; // Default PPI
+  let currentPPI = 96; // Default PPI (CSS pixels)
   let rulerUnit: "cm" | "inch" = "cm";
   let isCalibrated = false;
+
+  // Auto-detect resolution and pre-fill
+  const screenWidthInput = document.getElementById("screen-width") as HTMLInputElement;
+  const screenHeightInput = document.getElementById("screen-height") as HTMLInputElement;
+
+  // Use screen.width/height * devicePixelRatio for actual hardware resolution
+  const dpr = window.devicePixelRatio || 1;
+  const detectedWidth = Math.round(window.screen.width * dpr);
+  const detectedHeight = Math.round(window.screen.height * dpr);
+  screenWidthInput.value = String(detectedWidth);
+  screenHeightInput.value = String(detectedHeight);
+
+  // Update detection banner label
+  const detectedResLabel = document.getElementById("detected-res-label") as HTMLElement;
+  if (detectedResLabel) {
+    detectedResLabel.textContent = `${detectedWidth} × ${detectedHeight}`;
+  }
 
   // Try to load saved PPI
   const savedPPI = localStorage.getItem("screenPPI");
   if (savedPPI) {
     currentPPI = parseFloat(savedPPI);
-    calibrationSlider.value = String(currentPPI);
     isCalibrated = true;
     updateCalibrationStatus();
   }
-
-  // Calibration method tabs
-  document.querySelectorAll(".calibration-tabs .unit-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".calibration-tabs .unit-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      const method = (btn as HTMLElement).dataset.method;
-      (document.getElementById("cal-panel-card") as HTMLElement).style.display = method === "card" ? "block" : "none";
-      (document.getElementById("cal-panel-manual") as HTMLElement).style.display = method === "manual" ? "block" : "none";
-    });
-  });
 
   // Ruler unit toggle
   document.querySelectorAll("#ruler-unit-toggle .unit-btn").forEach((btn) => {
@@ -326,26 +269,6 @@
       drawRuler();
     });
   });
-
-  // Slider calibration
-  calibrationSlider.addEventListener("input", () => {
-    currentPPI = parseFloat(calibrationSlider.value);
-    updateCardLine();
-    updateCalibrationStatus();
-    drawRuler();
-    savePPI();
-  });
-
-  function updateCardLine() {
-    // Credit card is 85.6mm = 3.37 inches
-    const creditCardPixels = (85.6 / 25.4) * currentPPI;
-    if (cardLineInner) {
-      cardLineInner.style.width = `${creditCardPixels}px`;
-    }
-    if (ppiDisplay) {
-      ppiDisplay.textContent = `${Math.round(currentPPI)} PPI`;
-    }
-  }
 
   function updateCalibrationStatus() {
     isCalibrated = true;
@@ -365,34 +288,62 @@
 
     if (diagonal > 0 && width > 0 && height > 0) {
       const diagonalPixels = Math.sqrt(width * width + height * height);
-      currentPPI = diagonalPixels / diagonal;
-      calibrationSlider.value = String(Math.round(currentPPI));
-      updateCardLine();
+      // Physical PPI = diagonal pixels / diagonal inches
+      const physicalPPI = diagonalPixels / diagonal;
+      // Convert to CSS-pixel PPI (what the canvas uses)
+      // Since browser coordinates are in CSS pixels, and devicePixelRatio
+      // maps CSS pixels to physical pixels, we divide by DPR
+      currentPPI = physicalPPI / dpr;
       updateCalibrationStatus();
       drawRuler();
       savePPI();
+
+      // Dispatch PPI update
+      dispatchPPI();
     }
   });
 
+  // ─── Get theme-aware colors ───
+  function getRulerColors() {
+    const theme = document.documentElement.getAttribute("data-theme");
+    const isDark = theme === "dark";
+
+    return {
+      background: isDark ? "#0a0a0a" : "#ffffff",
+      rulerBody: isDark ? "#111111" : "#fafafa",
+      topBorder: isDark ? "#ededed" : "#171717",
+      majorTick: isDark ? "#ededed" : "#171717",
+      halfTick: isDark ? "#a1a1a1" : "#4d4d4d",
+      quarterTick: isDark ? "#666666" : "#888888",
+      minorTick: isDark ? "#333333" : "#cccccc",
+      labelColor: isDark ? "#ededed" : "#171717",
+      unitLabel: isDark ? "#666666" : "#888888",
+      dividerLine: isDark ? "#2a2a2a" : "#ebebeb",
+      infoText: isDark ? "#666666" : "#888888",
+    };
+  }
+
   // ─── Draw Ruler ───
   function drawRuler() {
-    const dpr = window.devicePixelRatio || 1;
+    const canvasDpr = window.devicePixelRatio || 1;
     const displayWidth = canvas.parentElement!.clientWidth;
     const displayHeight = 120;
 
-    canvas.width = displayWidth * dpr;
-    canvas.height = displayHeight * dpr;
+    canvas.width = displayWidth * canvasDpr;
+    canvas.height = displayHeight * canvasDpr;
     canvas.style.width = `${displayWidth}px`;
     canvas.style.height = `${displayHeight}px`;
-    ctx.scale(dpr, dpr);
+    ctx.scale(canvasDpr, canvasDpr);
+
+    const colors = getRulerColors();
 
     // Clear
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = colors.background;
     ctx.fillRect(0, 0, displayWidth, displayHeight);
 
     const pixelsPerUnit = rulerUnit === "cm"
-      ? currentPPI / 2.54  // pixels per cm
-      : currentPPI;         // pixels per inch
+      ? currentPPI / 2.54  // CSS pixels per cm
+      : currentPPI;         // CSS pixels per inch
 
     const subdivisionsPerUnit = rulerUnit === "cm" ? 10 : 16; // mm or 1/16 inch
     const pixelsPerSubdivision = pixelsPerUnit / subdivisionsPerUnit;
@@ -400,11 +351,11 @@
     const totalUnits = Math.floor(displayWidth / pixelsPerUnit) + 1;
 
     // Draw ruler body
-    ctx.fillStyle = "#fafafa";
+    ctx.fillStyle = colors.rulerBody;
     ctx.fillRect(0, 0, displayWidth, 80);
 
     // Draw top border
-    ctx.fillStyle = "#171717";
+    ctx.fillStyle = colors.topBorder;
     ctx.fillRect(0, 0, displayWidth, 2);
 
     // Draw ticks
@@ -421,27 +372,27 @@
           // Major tick (full unit)
           tickHeight = 40;
           tickWidth = 1.5;
-          color = "#171717";
+          color = colors.majorTick;
         } else if (rulerUnit === "cm" && sub === 5) {
           // Half cm
           tickHeight = 28;
           tickWidth = 1;
-          color = "#4d4d4d";
+          color = colors.halfTick;
         } else if (rulerUnit === "inch" && sub === 8) {
           // Half inch
           tickHeight = 28;
           tickWidth = 1;
-          color = "#4d4d4d";
+          color = colors.halfTick;
         } else if (rulerUnit === "inch" && (sub === 4 || sub === 12)) {
           // Quarter inch
           tickHeight = 20;
           tickWidth = 1;
-          color = "#888888";
+          color = colors.quarterTick;
         } else {
           // Minor tick
           tickHeight = 12;
           tickWidth = 0.5;
-          color = "#cccccc";
+          color = colors.minorTick;
         }
 
         ctx.fillStyle = color;
@@ -449,7 +400,7 @@
 
         // Draw unit label
         if (sub === 0 && unit > 0) {
-          ctx.fillStyle = "#171717";
+          ctx.fillStyle = colors.labelColor;
           ctx.font = "500 13px 'Geist', 'Inter', system-ui, sans-serif";
           ctx.textAlign = "center";
           ctx.fillText(String(unit), Math.round(x), 60);
@@ -458,30 +409,34 @@
     }
 
     // Draw unit label at origin
-    ctx.fillStyle = "#888888";
+    ctx.fillStyle = colors.unitLabel;
     ctx.font = "400 11px 'Geist Mono', monospace";
     ctx.textAlign = "left";
     ctx.fillText(rulerUnit === "cm" ? "cm" : "inches", 6, 75);
 
     // Draw bottom edge
-    ctx.fillStyle = "#ebebeb";
+    ctx.fillStyle = colors.dividerLine;
     ctx.fillRect(0, 79, displayWidth, 1);
 
     // Info area
-    ctx.fillStyle = "#fafafa";
+    ctx.fillStyle = colors.rulerBody;
     ctx.fillRect(0, 80, displayWidth, 40);
-    ctx.fillStyle = "#888888";
+    ctx.fillStyle = colors.infoText;
     ctx.font = "400 11px 'Geist Mono', monospace";
     ctx.textAlign = "center";
     ctx.fillText(`Screen PPI: ${Math.round(currentPPI)} · ${rulerUnit === "cm" ? "Centimeters" : "Inches"}`, displayWidth / 2, 105);
   }
 
   // Initialize
-  updateCardLine();
   drawRuler();
 
   // Redraw on resize
   window.addEventListener("resize", () => {
+    drawRuler();
+  });
+
+  // Redraw when theme changes
+  window.addEventListener("theme-changed", () => {
     drawRuler();
   });
 
@@ -490,6 +445,5 @@
     window.dispatchEvent(new CustomEvent("ppi-updated", { detail: { ppi: currentPPI } }));
   }
 
-  calibrationSlider.addEventListener("change", dispatchPPI);
   calcPpiBtn?.addEventListener("click", () => setTimeout(dispatchPPI, 100));
 </script>

@@ -87,7 +87,7 @@ import Footer from "../components/Footer.astro";
           <section class="content-section">
             <h2 class="display-md">How we measure DPI.</h2>
             <p class="body-md" style="color: var(--color-body);">
-              Our tool uses the browser's <strong>Pointer Lock API</strong> to capture raw mouse movement data. Here's the process:
+              Our tool captures raw mouse movement data directly from your hardware using modern browser technology — bypassing any OS-level processing that could distort the result. Here's the process from your perspective:
             </p>
 
             <div class="steps-list">
@@ -98,7 +98,7 @@ import Footer from "../components/Footer.astro";
                 <div>
                   <h4 class="body-md" style="font-weight: 500; margin: 0 0 4px;">Calibrate your screen</h4>
                   <p class="body-sm" style="color: var(--color-body); margin: 0;">
-                    You calibrate the on-screen ruler using a credit card (85.6mm standard) or by entering your screen's diagonal size and resolution. This establishes your screen's true PPI (pixels per physical inch).
+                    Enter your screen's diagonal size so the tool knows how many physical inches correspond to your screen's pixels. This is what makes the measurement real-world accurate.
                   </p>
                 </div>
               </div>
@@ -107,9 +107,9 @@ import Footer from "../components/Footer.astro";
                   <span class="code-text">2</span>
                 </div>
                 <div>
-                  <h4 class="body-md" style="font-weight: 500; margin: 0 0 4px;">Set target distance</h4>
+                  <h4 class="body-md" style="font-weight: 500; margin: 0 0 4px;">Set a target distance</h4>
                   <p class="body-sm" style="color: var(--color-body); margin: 0;">
-                    You choose a distance (e.g., 2 inches). Using the calibrated ruler as reference, you know exactly how far to move your mouse on your desk.
+                    Choose how far you'll physically move your mouse — 5 inches is a good starting point. Use the on-screen ruler as your reference guide.
                   </p>
                 </div>
               </div>
@@ -118,20 +118,9 @@ import Footer from "../components/Footer.astro";
                   <span class="code-text">3</span>
                 </div>
                 <div>
-                  <h4 class="body-md" style="font-weight: 500; margin: 0 0 4px;">Lock pointer and capture deltas</h4>
+                  <h4 class="body-md" style="font-weight: 500; margin: 0 0 4px;">Move and measure</h4>
                   <p class="body-sm" style="color: var(--color-body); margin: 0;">
-                    When you click the test area, we call <code>requestPointerLock()</code>. This gives us access to <code>event.movementX</code> and <code>event.movementY</code> — raw mouse deltas reported by the hardware, unaffected by cursor position or screen edges.
-                  </p>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-marker">
-                  <span class="code-text">4</span>
-                </div>
-                <div>
-                  <h4 class="body-md" style="font-weight: 500; margin: 0 0 4px;">Calculate DPI</h4>
-                  <p class="body-sm" style="color: var(--color-body); margin: 0;">
-                    We sum all movement deltas along the chosen axis, then divide by the target distance: <code>DPI = total_pixels / distance_inches</code>.
+                    Click the test area to begin, move your mouse the target distance, then click again to finish. The tool processes the raw movement data and calculates your DPI instantly.
                   </p>
                 </div>
               </div>
