@@ -679,6 +679,7 @@
   let totalDeltaY = 0;
   let currentUnit: "inch" | "cm" = "inch";
   let currentAxis: "x" | "y" = "x";
+  let usingRawInput = false; // Whether unadjustedMovement was granted
   let history: Array<{ dpi: number; pixels: number; distance: string; axis: string; time: string }> = [];
 
   // Unit toggle
@@ -716,7 +717,16 @@
 
   // Get pixels moved along active axis
   function getAxisPixels(): number {
-    return Math.abs(currentAxis === "x" ? totalDeltaX : totalDeltaY);
+    const rawPixels = Math.abs(currentAxis === "x" ? totalDeltaX : totalDeltaY);
+    if (usingRawInput) {
+      // With unadjustedMovement, movementX/Y are raw hardware counts
+      // — no OS processing, no DPR scaling. Direct 1:1 with mouse DPI.
+      return Math.round(rawPixels);
+    }
+    // Fallback: without unadjustedMovement, values are in CSS pixels
+    // and may be scaled by devicePixelRatio on high-DPI displays.
+    const dpr = window.devicePixelRatio || 1;
+    return Math.round(rawPixels * dpr);
   }
 
   // Calculate DPI
@@ -748,11 +758,37 @@
     }
   }
 
-  // Start test
+  // Start test — request pointer lock with unadjusted (raw) movement
   function startTest() {
     if (isActive) return;
 
-    testArea.requestPointerLock();
+    // Try to get raw, unprocessed mouse input via unadjustedMovement.
+    // This bypasses OS-level pointer acceleration, speed scaling, and
+    // DPR transformations — giving us true hardware DPI counts.
+    // Falls back to standard pointer lock if not supported.
+    try {
+      const promise = (testArea as any).requestPointerLock({
+        unadjustedMovement: true,
+      });
+      if (promise instanceof Promise) {
+        promise
+          .then(() => {
+            usingRawInput = true;
+          })
+          .catch(() => {
+            // unadjustedMovement not supported — fall back
+            usingRawInput = false;
+            testArea.requestPointerLock();
+          });
+      } else {
+        // Older API returns void, pointer lock was already requested
+        usingRawInput = false;
+      }
+    } catch {
+      // Options parameter not supported at all
+      usingRawInput = false;
+      testArea.requestPointerLock();
+    }
   }
 
   // Handle pointer lock change
@@ -765,7 +801,7 @@
       testArea.classList.add("active");
       if (testActiveInfo) testActiveInfo.style.display = "flex";
       if (statStatus) {
-        statStatus.textContent = "Measuring...";
+        statStatus.textContent = usingRawInput ? "Measuring (raw)" : "Measuring...";
         statStatus.style.color = "var(--color-cyan)";
       }
       updateLiveStats();
