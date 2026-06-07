@@ -42,10 +42,10 @@
       </div>
 
       <div class="setting-group">
-        <label class="setting-label body-sm">Physical Ruler</label>
+        <label class="setting-label body-sm">Virtual Ruler</label>
         <div class="setting-row" style="align-items: center; cursor: pointer;">
-          <input type="checkbox" id="physical-ruler-cb" checked style="cursor: pointer;" />
-          <label for="physical-ruler-cb" class="body-sm" style="margin-left: 8px; cursor: pointer;">I have a physical ruler</label>
+          <input type="checkbox" id="virtual-ruler-cb" style="cursor: pointer;" />
+          <label for="virtual-ruler-cb" class="body-sm" style="margin-left: 8px; cursor: pointer;">Use virtual ruler</label>
         </div>
       </div>
 
@@ -113,12 +113,12 @@
 
           <!-- State overlay -->
           <div class="test-overlay" id="test-overlay">
-            <div class="test-prompt">
+            <div class="test-prompt" id="test-prompt">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 3l14 9-14 9V3z"></path>
               </svg>
-              <span class="body-md" style="font-weight: 500;">Click to start measuring</span>
-              <span class="body-sm" style="color: var(--color-mute);">Cursor will be locked for accurate tracking</span>
+              <span class="body-md" id="test-prompt-title" style="font-weight: 500;">Click to start measuring</span>
+              <span class="body-sm" id="test-prompt-desc" style="color: var(--color-mute);">Cursor will be locked for accurate tracking</span>
             </div>
           </div>
 
@@ -696,7 +696,7 @@
   // Calibration State
   let currentPPI = 96;
   let isCalibrated = false;
-  const physicalRulerCb = document.getElementById("physical-ruler-cb") as HTMLInputElement;
+  const virtualRulerCb = document.getElementById("virtual-ruler-cb") as HTMLInputElement;
   const calibrationSettings = document.getElementById("calibration-settings") as HTMLElement;
   const screenWidthInput = document.getElementById("screen-width") as HTMLInputElement;
   const screenHeightInput = document.getElementById("screen-height") as HTMLInputElement;
@@ -710,9 +710,9 @@
   // Init Calibration
   // No auto-calibration; user must manually fill fields
 
-  physicalRulerCb?.addEventListener("change", () => {
+  virtualRulerCb?.addEventListener("change", () => {
     if (calibrationSettings) {
-      calibrationSettings.style.display = physicalRulerCb.checked ? "none" : "block";
+      calibrationSettings.style.display = virtualRulerCb.checked ? "block" : "none";
     }
   });
 
@@ -729,7 +729,7 @@
         calibrationStatusText.textContent = `Calibrated: ${Math.round(currentPPI)} PPI`;
         calibrationStatusText.style.color = "var(--color-success)";
       }
-      if (isActive && !physicalRulerCb.checked) drawRuler();
+      if (isActive && virtualRulerCb.checked) drawRuler();
     } else {
       alert("Please enter valid screen diagonal and resolution values.");
     }
@@ -814,11 +814,20 @@
   }
 
   window.addEventListener("resize", () => {
-    if (isActive && !physicalRulerCb.checked) drawRuler();
+    if (isActive && virtualRulerCb.checked) drawRuler();
   });
   window.addEventListener("theme-changed", () => {
-    if (isActive && !physicalRulerCb.checked) drawRuler();
+    if (isActive && virtualRulerCb.checked) drawRuler();
   });
+
+  function updateDirectionLabel() {
+    if (!directionLabel) return;
+    const isVirtual = virtualRulerCb && virtualRulerCb.checked;
+    const rulerType = isVirtual ? "virtual ruler" : "ruler";
+    const dist = getTargetDisplay();
+    const arrow = currentAxis === "x" ? "→" : "↓";
+    directionLabel.textContent = `Physically move your mouse ${dist} using your ${rulerType} ${arrow}`;
+  }
 
   // Unit toggle
   document.querySelectorAll("#unit-toggle .unit-btn").forEach((btn) => {
@@ -827,7 +836,8 @@
       btn.classList.add("active");
       currentUnit = (btn as HTMLElement).dataset.unit as "inch" | "cm";
       updateLiveStats();
-      if (isActive && !physicalRulerCb.checked) drawRuler();
+      updateDirectionLabel();
+      if (isActive && virtualRulerCb.checked) drawRuler();
     });
   });
 
@@ -837,11 +847,16 @@
       document.querySelectorAll("#axis-toggle .unit-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       currentAxis = (btn as HTMLElement).dataset.axis as "x" | "y";
-      if (directionLabel) {
-        directionLabel.textContent = currentAxis === "x" ? "Move mouse →" : "Move mouse ↓";
-      }
+      updateDirectionLabel();
     });
   });
+
+  if (targetDistanceInput) {
+    targetDistanceInput.addEventListener("input", () => {
+      updateLiveStats();
+      updateDirectionLabel();
+    });
+  }
 
   // Get target distance in inches
   function getTargetInches(): number {
@@ -931,7 +946,7 @@
       totalDeltaY = 0;
       testArea.classList.add("active");
       if (testActiveInfo) testActiveInfo.style.display = "flex";
-      if (!physicalRulerCb?.checked && onScreenRulerWrapper) {
+      if (virtualRulerCb?.checked && onScreenRulerWrapper) {
         onScreenRulerWrapper.style.display = "block";
         drawRuler();
       }
@@ -940,6 +955,7 @@
         statStatus.style.color = "var(--color-cyan)";
       }
       updateLiveStats();
+      updateDirectionLabel();
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mousedown", onMouseDown);
     } else {
@@ -1042,15 +1058,29 @@
     }
   }
 
+  function showCalibrationWarning() {
+    const testPromptDesc = document.getElementById("test-prompt-desc");
+    if (testPromptDesc) {
+      const originalText = testPromptDesc.textContent;
+      const originalColor = testPromptDesc.style.color;
+      testPromptDesc.textContent = "Please calibrate your screen in the settings before starting.";
+      testPromptDesc.style.color = "var(--color-warning)";
+      setTimeout(() => {
+        testPromptDesc.textContent = originalText;
+        testPromptDesc.style.color = originalColor;
+      }, 3000);
+    }
+    if (calibrationSettings) {
+      calibrationSettings.style.background = "var(--color-canvas-soft-2)";
+      setTimeout(() => calibrationSettings.style.background = "transparent", 1000);
+    }
+  }
+
   // Click to start
   testArea.addEventListener("click", () => {
     if (!isActive) {
-      if (!physicalRulerCb.checked && !isCalibrated) {
-        alert("Please calibrate your screen in the settings before starting the measurement.");
-        if (calibrationSettings) {
-          calibrationSettings.style.background = "var(--color-canvas-soft-2)";
-          setTimeout(() => calibrationSettings.style.background = "transparent", 1000);
-        }
+      if (virtualRulerCb.checked && !isCalibrated) {
+        showCalibrationWarning();
         return;
       }
       startTest();
@@ -1081,12 +1111,8 @@
   document.addEventListener("keydown", (e) => {
     if (e.code === "Space" && !isActive && document.activeElement === document.body) {
       e.preventDefault();
-      if (!physicalRulerCb.checked && !isCalibrated) {
-        alert("Please calibrate your screen in the settings before starting the measurement.");
-        if (calibrationSettings) {
-          calibrationSettings.style.background = "var(--color-canvas-soft-2)";
-          setTimeout(() => calibrationSettings.style.background = "transparent", 1000);
-        }
+      if (virtualRulerCb.checked && !isCalibrated) {
+        showCalibrationWarning();
         return;
       }
       startTest();
