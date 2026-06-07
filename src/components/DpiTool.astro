@@ -42,6 +42,32 @@
       </div>
 
       <div class="setting-group">
+        <label class="setting-label body-sm">Physical Ruler</label>
+        <div class="setting-row" style="align-items: center; cursor: pointer;">
+          <input type="checkbox" id="physical-ruler-cb" checked style="cursor: pointer;" />
+          <label for="physical-ruler-cb" class="body-sm" style="margin-left: 8px; cursor: pointer;">I have a physical ruler</label>
+        </div>
+      </div>
+
+      <div id="calibration-settings" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-hairline);">
+        <h4 class="body-sm" style="font-weight: 500; margin: 0 0 12px;">Screen Calibration</h4>
+        <div class="setting-group">
+          <label class="setting-label body-sm">Screen diagonal (inches)</label>
+          <input type="number" class="input" id="screen-diagonal" placeholder="e.g. 15.6" min="5" max="50" step="0.1" />
+        </div>
+        <div class="setting-group">
+          <label class="setting-label body-sm">Resolution</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="number" class="input" id="screen-width" placeholder="1920" />
+            <span class="body-sm" style="color: var(--color-mute);">×</span>
+            <input type="number" class="input" id="screen-height" placeholder="1080" />
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="calc-ppi-btn" style="width: 100%;">Calibrate Screen</button>
+        <div class="body-sm" id="calibration-status-text" style="color: var(--color-mute); margin-top: 8px; text-align: center;">Using default (96 PPI)</div>
+      </div>
+
+      <div class="setting-group">
         <label class="setting-label body-sm">Axis</label>
         <div class="unit-toggle" id="axis-toggle">
           <button class="unit-btn active" data-axis="x" id="axis-x">Horizontal</button>
@@ -103,10 +129,11 @@
               <span class="live-pixels display-lg" id="live-pixels">0</span>
             </div>
             <div class="live-direction" id="live-direction">
-              <div class="direction-bar">
-                <div class="direction-fill" id="direction-fill"></div>
-              </div>
               <span class="caption-mono" id="direction-label" style="color: var(--color-mute);">Move mouse →</span>
+            </div>
+            
+            <div id="on-screen-ruler-wrapper" style="display: none; width: 100%; max-width: 800px; border-radius: var(--radius-sm); margin-top: 16px;">
+              <canvas id="ruler-canvas" style="display: block; width: 100%; min-height: 80px;"></canvas>
             </div>
           </div>
         </div>
@@ -374,22 +401,6 @@
   .live-pixels {
     color: var(--color-link);
     font-variant-numeric: tabular-nums;
-  }
-
-  .direction-bar {
-    width: 200px;
-    height: 4px;
-    background: var(--color-canvas-soft-2);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .direction-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--color-grad-develop-start), var(--color-grad-develop-end));
-    border-radius: 2px;
-    transition: width 0.1s ease;
   }
 
   .live-direction {
@@ -682,6 +693,136 @@
   let usingRawInput = false; // Whether unadjustedMovement was granted
   let history: Array<{ dpi: number; pixels: number; distance: string; axis: string; time: string }> = [];
 
+  // Calibration State
+  let currentPPI = 96;
+  const physicalRulerCb = document.getElementById("physical-ruler-cb") as HTMLInputElement;
+  const calibrationSettings = document.getElementById("calibration-settings") as HTMLElement;
+  const screenWidthInput = document.getElementById("screen-width") as HTMLInputElement;
+  const screenHeightInput = document.getElementById("screen-height") as HTMLInputElement;
+  const screenDiagonalInput = document.getElementById("screen-diagonal") as HTMLInputElement;
+  const calcPpiBtn = document.getElementById("calc-ppi-btn") as HTMLButtonElement;
+  const calibrationStatusText = document.getElementById("calibration-status-text") as HTMLElement;
+  const onScreenRulerWrapper = document.getElementById("on-screen-ruler-wrapper") as HTMLElement;
+  const rulerCanvas = document.getElementById("ruler-canvas") as HTMLCanvasElement;
+  const rulerCtx = rulerCanvas?.getContext("2d");
+
+  // Init Calibration
+  if (screenWidthInput && screenHeightInput) {
+    const dpr = window.devicePixelRatio || 1;
+    screenWidthInput.value = String(Math.round(window.screen.width * dpr));
+    screenHeightInput.value = String(Math.round(window.screen.height * dpr));
+  }
+  const savedPPI = localStorage.getItem("screenPPI");
+  if (savedPPI) {
+    currentPPI = parseFloat(savedPPI);
+    if (calibrationStatusText) calibrationStatusText.textContent = `Calibrated: ${Math.round(currentPPI)} PPI`;
+  }
+
+  physicalRulerCb?.addEventListener("change", () => {
+    if (calibrationSettings) {
+      calibrationSettings.style.display = physicalRulerCb.checked ? "none" : "block";
+    }
+  });
+
+  calcPpiBtn?.addEventListener("click", () => {
+    const diagonal = parseFloat(screenDiagonalInput.value);
+    const width = parseInt(screenWidthInput.value);
+    const height = parseInt(screenHeightInput.value);
+    if (diagonal > 0 && width > 0 && height > 0) {
+      const dpr = window.devicePixelRatio || 1;
+      const diagonalPixels = Math.sqrt(width * width + height * height);
+      currentPPI = (diagonalPixels / diagonal) / dpr;
+      if (calibrationStatusText) calibrationStatusText.textContent = `Calibrated: ${Math.round(currentPPI)} PPI`;
+      localStorage.setItem("screenPPI", String(currentPPI));
+      if (isActive && !physicalRulerCb.checked) drawRuler();
+    }
+  });
+
+  // Ruler Drawing Logic
+  function getRulerColors() {
+    const theme = document.documentElement.getAttribute("data-theme");
+    const isDark = theme === "dark";
+    return {
+      background: isDark ? "#0a0a0a" : "#ffffff",
+      rulerBody: isDark ? "#111111" : "#fafafa",
+      topBorder: isDark ? "#ededed" : "#171717",
+      majorTick: isDark ? "#ededed" : "#171717",
+      halfTick: isDark ? "#a1a1a1" : "#4d4d4d",
+      quarterTick: isDark ? "#666666" : "#888888",
+      minorTick: isDark ? "#333333" : "#cccccc",
+      labelColor: isDark ? "#ededed" : "#171717",
+      unitLabel: isDark ? "#666666" : "#888888",
+      dividerLine: isDark ? "#2a2a2a" : "#ebebeb",
+      infoText: isDark ? "#666666" : "#888888",
+    };
+  }
+
+  function drawRuler() {
+    if (!rulerCanvas || !rulerCtx) return;
+    const canvasDpr = window.devicePixelRatio || 1;
+    const displayWidth = testArea.clientWidth - 40; // some padding
+    const displayHeight = 80;
+
+    rulerCanvas.width = displayWidth * canvasDpr;
+    rulerCanvas.height = displayHeight * canvasDpr;
+    rulerCanvas.style.width = `${displayWidth}px`;
+    rulerCanvas.style.height = `${displayHeight}px`;
+    rulerCtx.scale(canvasDpr, canvasDpr);
+
+    const colors = getRulerColors();
+    rulerCtx.fillStyle = colors.background;
+    rulerCtx.fillRect(0, 0, displayWidth, displayHeight);
+
+    const pixelsPerUnit = currentUnit === "cm" ? currentPPI / 2.54 : currentPPI;
+    const subdivisionsPerUnit = currentUnit === "cm" ? 10 : 16;
+    const pixelsPerSubdivision = pixelsPerUnit / subdivisionsPerUnit;
+    const totalUnits = Math.floor(displayWidth / pixelsPerUnit) + 1;
+
+    rulerCtx.fillStyle = colors.rulerBody;
+    rulerCtx.fillRect(0, 0, displayWidth, displayHeight);
+    rulerCtx.fillStyle = colors.topBorder;
+    rulerCtx.fillRect(0, 0, displayWidth, 2);
+
+    for (let unit = 0; unit <= totalUnits; unit++) {
+      for (let sub = 0; sub < subdivisionsPerUnit; sub++) {
+        const x = unit * pixelsPerUnit + sub * pixelsPerSubdivision;
+        if (x > displayWidth) break;
+
+        let tickHeight, tickWidth, color;
+        if (sub === 0) {
+          tickHeight = 30; tickWidth = 1.5; color = colors.majorTick;
+        } else if ((currentUnit === "cm" && sub === 5) || (currentUnit === "inch" && sub === 8)) {
+          tickHeight = 20; tickWidth = 1; color = colors.halfTick;
+        } else if (currentUnit === "inch" && (sub === 4 || sub === 12)) {
+          tickHeight = 15; tickWidth = 1; color = colors.quarterTick;
+        } else {
+          tickHeight = 8; tickWidth = 0.5; color = colors.minorTick;
+        }
+
+        rulerCtx.fillStyle = color;
+        rulerCtx.fillRect(Math.round(x) - tickWidth / 2, 2, tickWidth, tickHeight);
+
+        if (sub === 0 && unit > 0) {
+          rulerCtx.fillStyle = colors.labelColor;
+          rulerCtx.font = "500 13px 'Geist', 'Inter', system-ui, sans-serif";
+          rulerCtx.textAlign = "center";
+          rulerCtx.fillText(String(unit), Math.round(x), 45);
+        }
+      }
+    }
+    rulerCtx.fillStyle = colors.unitLabel;
+    rulerCtx.font = "400 11px 'Geist Mono', monospace";
+    rulerCtx.textAlign = "left";
+    rulerCtx.fillText(currentUnit === "cm" ? "cm" : "inches", 6, 60);
+  }
+
+  window.addEventListener("resize", () => {
+    if (isActive && !physicalRulerCb.checked) drawRuler();
+  });
+  window.addEventListener("theme-changed", () => {
+    if (isActive && !physicalRulerCb.checked) drawRuler();
+  });
+
   // Unit toggle
   document.querySelectorAll("#unit-toggle .unit-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -689,6 +830,7 @@
       btn.classList.add("active");
       currentUnit = (btn as HTMLElement).dataset.unit as "inch" | "cm";
       updateLiveStats();
+      if (isActive && !physicalRulerCb.checked) drawRuler();
     });
   });
 
@@ -748,14 +890,6 @@
     if (statPixels) statPixels.textContent = String(pixels);
     if (statDistance) statDistance.textContent = `${getTargetDisplay()}`;
     if (statDpi) statDpi.textContent = isActive && pixels > 10 ? String(dpi) : "—";
-
-    // Direction fill progress (visual feedback)
-    if (directionFill) {
-      // Estimate progress — rough pixels/inch * target
-      const estimatedTotalPixels = 96 * targetInches; // 96 is a rough screen PPI
-      const progress = Math.min((pixels / estimatedTotalPixels) * 100, 100);
-      directionFill.style.width = `${progress}%`;
-    }
   }
 
   // Start test — request pointer lock with unadjusted (raw) movement
@@ -800,6 +934,10 @@
       totalDeltaY = 0;
       testArea.classList.add("active");
       if (testActiveInfo) testActiveInfo.style.display = "flex";
+      if (!physicalRulerCb?.checked && onScreenRulerWrapper) {
+        onScreenRulerWrapper.style.display = "block";
+        drawRuler();
+      }
       if (statStatus) {
         statStatus.textContent = usingRawInput ? "Measuring (raw)" : "Measuring...";
         statStatus.style.color = "var(--color-cyan)";
@@ -812,6 +950,7 @@
       isActive = false;
       testArea.classList.remove("active");
       if (testActiveInfo) testActiveInfo.style.display = "none";
+      if (onScreenRulerWrapper) onScreenRulerWrapper.style.display = "none";
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mousedown", onMouseDown);
       finishTest();
@@ -931,7 +1070,6 @@
     if (historyEmpty) historyEmpty.style.display = "block";
     if (historyList) historyList.innerHTML = "";
     if (livePixels) livePixels.textContent = "0";
-    if (directionFill) directionFill.style.width = "0%";
   });
 
   // Keyboard shortcut: Space to start

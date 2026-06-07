@@ -3,7 +3,6 @@ import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import DpiTool from "../components/DpiTool.astro";
-import ScreenRuler from "../components/ScreenRuler.astro";
 ---
 
 <Layout
@@ -25,20 +24,6 @@ import ScreenRuler from "../components/ScreenRuler.astro";
 
       <!-- DPI Tool -->
       <DpiTool />
-
-      <!-- Ruler section -->
-      <div class="ruler-section-wrapper">
-        <div class="section-header" style="margin-top: 64px;">
-          <span class="caption-mono" style="color: var(--color-mute);">Reference</span>
-          <h2 class="display-md" style="margin: 8px 0 0;">On-Screen Ruler.</h2>
-          <p class="body-md" style="color: var(--color-body); margin: 8px 0 0;">
-            Use this ruler to measure the exact distance you move your mouse. Calibrate first for accuracy.
-          </p>
-        </div>
-        <div style="margin-top: 32px;">
-          <ScreenRuler />
-        </div>
-      </div>
 
       <!-- Tips -->
       <div class="tips-section" style="margin-top: 64px;">
@@ -68,7 +53,7 @@ import ScreenRuler from "../components/ScreenRuler.astro";
           <div class="card-soft tip-card">
             <h4 class="body-md" style="font-weight: 500; margin: 0 0 8px;">Calibrate your screen</h4>
             <p class="body-sm" style="color: var(--color-body); margin: 0;">
-              Use the ruler calibration tool with your monitor's screen size and resolution for the most accurate distance reference on your display.
+              If using the on-screen ruler, calibrate it with your monitor's screen size and resolution for the most accurate distance reference.
             </p>
           </div>
         </div>
