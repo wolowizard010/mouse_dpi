@@ -49,11 +49,11 @@
         </div>
       </div>
 
-      <div id="calibration-settings" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-hairline);">
+      <div id="calibration-settings" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-hairline); transition: background 0.3s ease; border-radius: var(--radius-sm); padding-left: 8px; padding-right: 8px;">
         <h4 class="body-sm" style="font-weight: 500; margin: 0 0 12px;">Screen Calibration</h4>
         <div class="setting-group">
           <label class="setting-label body-sm">Screen diagonal (inches)</label>
-          <input type="number" class="input" id="screen-diagonal" placeholder="e.g. 15.6" min="5" max="50" step="0.1" />
+          <input type="number" class="input" id="screen-diagonal" placeholder="e.g. 24" min="5" max="50" step="0.1" />
         </div>
         <div class="setting-group">
           <label class="setting-label body-sm">Resolution</label>
@@ -64,7 +64,7 @@
           </div>
         </div>
         <button class="btn btn-secondary btn-sm" id="calc-ppi-btn" style="width: 100%;">Calibrate Screen</button>
-        <div class="body-sm" id="calibration-status-text" style="color: var(--color-mute); margin-top: 8px; text-align: center;">Using default (96 PPI)</div>
+        <div class="body-sm" id="calibration-status-text" style="color: var(--color-mute); margin-top: 8px; text-align: center;">Not calibrated</div>
       </div>
 
       <div class="setting-group">
@@ -695,6 +695,7 @@
 
   // Calibration State
   let currentPPI = 96;
+  let isCalibrated = false;
   const physicalRulerCb = document.getElementById("physical-ruler-cb") as HTMLInputElement;
   const calibrationSettings = document.getElementById("calibration-settings") as HTMLElement;
   const screenWidthInput = document.getElementById("screen-width") as HTMLInputElement;
@@ -707,16 +708,7 @@
   const rulerCtx = rulerCanvas?.getContext("2d");
 
   // Init Calibration
-  if (screenWidthInput && screenHeightInput) {
-    const dpr = window.devicePixelRatio || 1;
-    screenWidthInput.value = String(Math.round(window.screen.width * dpr));
-    screenHeightInput.value = String(Math.round(window.screen.height * dpr));
-  }
-  const savedPPI = localStorage.getItem("screenPPI");
-  if (savedPPI) {
-    currentPPI = parseFloat(savedPPI);
-    if (calibrationStatusText) calibrationStatusText.textContent = `Calibrated: ${Math.round(currentPPI)} PPI`;
-  }
+  // No auto-calibration; user must manually fill fields
 
   physicalRulerCb?.addEventListener("change", () => {
     if (calibrationSettings) {
@@ -732,9 +724,14 @@
       const dpr = window.devicePixelRatio || 1;
       const diagonalPixels = Math.sqrt(width * width + height * height);
       currentPPI = (diagonalPixels / diagonal) / dpr;
-      if (calibrationStatusText) calibrationStatusText.textContent = `Calibrated: ${Math.round(currentPPI)} PPI`;
-      localStorage.setItem("screenPPI", String(currentPPI));
+      isCalibrated = true;
+      if (calibrationStatusText) {
+        calibrationStatusText.textContent = `Calibrated: ${Math.round(currentPPI)} PPI`;
+        calibrationStatusText.style.color = "var(--color-success)";
+      }
       if (isActive && !physicalRulerCb.checked) drawRuler();
+    } else {
+      alert("Please enter valid screen diagonal and resolution values.");
     }
   });
 
@@ -1048,6 +1045,14 @@
   // Click to start
   testArea.addEventListener("click", () => {
     if (!isActive) {
+      if (!physicalRulerCb.checked && !isCalibrated) {
+        alert("Please calibrate your screen in the settings before starting the measurement.");
+        if (calibrationSettings) {
+          calibrationSettings.style.background = "var(--color-canvas-soft-2)";
+          setTimeout(() => calibrationSettings.style.background = "transparent", 1000);
+        }
+        return;
+      }
       startTest();
     }
   });
@@ -1076,6 +1081,14 @@
   document.addEventListener("keydown", (e) => {
     if (e.code === "Space" && !isActive && document.activeElement === document.body) {
       e.preventDefault();
+      if (!physicalRulerCb.checked && !isCalibrated) {
+        alert("Please calibrate your screen in the settings before starting the measurement.");
+        if (calibrationSettings) {
+          calibrationSettings.style.background = "var(--color-canvas-soft-2)";
+          setTimeout(() => calibrationSettings.style.background = "transparent", 1000);
+        }
+        return;
+      }
       startTest();
     }
   });
