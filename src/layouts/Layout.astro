@@ -5,12 +5,14 @@ interface Props {
   title?: string;
   description?: string;
   canonicalUrl?: string;
+  image?: string;
 }
 
 const {
   title = "Mouse DPI Analyzer — Accurate DPI Measurement Tool",
   description = "Measure your mouse DPI with precision. Free online tool with screen calibration, on-screen ruler, and real-time DPI calculation. No software download needed.",
   canonicalUrl = Astro.url.href,
+  image = "/og-image.png",
 } = Astro.props;
 
 const siteName = "Mouse DPI Analyzer";
@@ -46,11 +48,13 @@ const siteName = "Mouse DPI Analyzer";
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content={siteName} />
+    <meta property="og:image" content={new URL(image, Astro.url)} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(image, Astro.url)} />
 
     <!-- Fonts: Geist Sans + Geist Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
