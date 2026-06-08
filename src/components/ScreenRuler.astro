@@ -62,7 +62,7 @@
       </div>
     </div>
 
-    <button class="btn btn-primary btn-sm" id="calc-ppi-btn" style="width: 100%; margin-top: 12px;">Calculate PPI</button>
+    <button class="btn btn-primary btn-sm" id="calc-ppi-btn" style="width: 100%; margin-top: 12px;">Calibrate</button>
 
     <!-- Unit toggle -->
     <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
@@ -76,7 +76,7 @@
     <!-- Calibration status -->
     <div class="calibration-status" id="calibration-status">
       <div class="status-dot" id="status-dot"></div>
-      <span class="body-sm" id="calibration-status-text">Using default (96 PPI)</span>
+      <span class="body-sm" id="calibration-status-text">Not calibrated</span>
     </div>
   </div>
 
@@ -321,7 +321,7 @@
   function updateCalibrationStatus() {
     isCalibrated = true;
     if (statusDot) statusDot.classList.add("calibrated");
-    if (statusText) statusText.textContent = `Calibrated: ${Math.round(currentPPI)} PPI`;
+    if (statusText) statusText.textContent = `Calibrated`;
   }
 
   function savePPI() {
@@ -486,7 +486,7 @@
     ctx.fillStyle = colors.infoText;
     ctx.font = "400 11px 'Geist Mono', monospace";
     ctx.textAlign = "center";
-    ctx.fillText(`Screen PPI: ${Math.round(currentPPI)} · ${rulerUnit === "cm" ? "Centimeters" : "Inches"}`, displayWidth / 2, 105);
+    ctx.fillText(`${rulerUnit === "cm" ? "Centimeters" : "Inches"}`, displayWidth / 2, 105);
   }
 
   // Initialize

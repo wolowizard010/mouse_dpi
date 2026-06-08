@@ -41,11 +41,10 @@
         />
       </div>
 
-      <div class="setting-group">
-        <label class="setting-label body-sm">Virtual Ruler</label>
+      <div class="setting-group" style="background: var(--color-canvas-soft); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-hairline);">
         <div class="setting-row" style="align-items: center; cursor: pointer;">
-          <input type="checkbox" id="virtual-ruler-cb" style="cursor: pointer;" />
-          <label for="virtual-ruler-cb" class="body-sm" style="margin-left: 8px; cursor: pointer;">Use virtual ruler</label>
+          <input type="checkbox" id="virtual-ruler-cb" style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--color-link);" />
+          <label for="virtual-ruler-cb" class="body-sm" style="margin-left: 8px; cursor: pointer; font-weight: 500;">Use virtual ruler for measurement</label>
         </div>
       </div>
 
@@ -778,6 +777,16 @@
   const rulerCanvas = document.getElementById("ruler-canvas") as HTMLCanvasElement;
   const rulerCtx = rulerCanvas?.getContext("2d");
 
+  const savedPPI = localStorage.getItem("screenPPI");
+  if (savedPPI) {
+    currentPPI = parseFloat(savedPPI);
+    isCalibrated = true;
+    if (calibrationStatusText) {
+      calibrationStatusText.textContent = "Calibrated";
+      calibrationStatusText.style.color = "var(--color-success)";
+    }
+  }
+
   // Presets definition
   const MONITOR_PRESETS = [
     { diagonal: 13.3, w: 1920, h: 1080, name: '13.3" 1080p (Laptop)' },
@@ -878,10 +887,11 @@
       isCalibrated = true;
       
       if (calibrationStatusText) {
-        calibrationStatusText.textContent = `Calibrated: ${Math.round(currentPPI)} PPI`;
+        calibrationStatusText.textContent = "Calibrated";
         calibrationStatusText.style.color = "var(--color-success)";
       }
       
+      localStorage.setItem("screenPPI", String(currentPPI));
       calibrationModal.style.display = "none";
       if (isActive && virtualRulerCb.checked) drawRuler();
     } else {
@@ -1092,8 +1102,26 @@
   }
 
   // Handle pointer lock change
+  let savedScrollY = 0;
+  let savedOverflow = "";
+  let savedPaddingRight = "";
+
+  function onWheel(e: WheelEvent) {
+    if (isActive) e.preventDefault();
+  }
+
   document.addEventListener("pointerlockchange", () => {
     if (document.pointerLockElement === testArea) {
+      savedScrollY = window.scrollY;
+      savedOverflow = document.body.style.overflow;
+      savedPaddingRight = document.body.style.paddingRight;
+      
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+      document.body.style.overflow = "hidden";
+
       // Locked — start tracking
       isActive = true;
       totalDeltaX = 0;
@@ -1112,14 +1140,22 @@
       updateDirectionLabel();
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mousedown", onMouseDown);
+      window.addEventListener("wheel", onWheel, { passive: false });
     } else {
       // Unlocked — finalize
+      document.body.style.overflow = savedOverflow;
+      document.body.style.paddingRight = savedPaddingRight;
+      
+      window.scrollTo({ top: savedScrollY, behavior: "instant" });
+      setTimeout(() => window.scrollTo({ top: savedScrollY, behavior: "instant" }), 0);
+      
       isActive = false;
       testArea.classList.remove("active");
       if (testActiveInfo) testActiveInfo.style.display = "none";
       if (onScreenRulerWrapper) onScreenRulerWrapper.style.display = "none";
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("wheel", onWheel);
       finishTest();
     }
   });
@@ -1133,6 +1169,7 @@
   function onMouseDown(e: MouseEvent) {
     if (e.button === 0 && isActive) {
       e.preventDefault();
+      e.stopPropagation();
       document.exitPointerLock();
     }
   }
@@ -1231,7 +1268,9 @@
   }
 
   // Click to start
-  testArea.addEventListener("click", () => {
+  testArea.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!isActive) {
       if (virtualRulerCb.checked && !isCalibrated) {
         showCalibrationWarning();
