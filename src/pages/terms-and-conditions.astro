@@ -1,0 +1,52 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout
+  title="Terms & Conditions - My Mouse DPI"
+  description="Terms and Conditions for My Mouse DPI."
+>
+  <Navbar />
+  <main class="page-container container">
+    <div style="max-width: 720px;">
+      <div style="margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--color-hairline);">
+        <span class="caption-mono" style="color: var(--color-mute);">Legal</span>
+        <h1 class="display-lg" style="margin: 8px 0 0;">Terms & Conditions.</h1>
+      </div>
+      <div class="content">
+        <p class="body-md" style="color: var(--color-mute); margin-bottom: 32px;">Last updated: {new Date().toLocaleDateString()}</p>
+        
+        <h2 class="display-md" style="margin: 32px 0 16px;">1. Acceptance of Terms</h2>
+        <p class="body-md" style="color: var(--color-body); margin-bottom: 24px;">By accessing and using My Mouse DPI, you accept and agree to be bound by the terms and provision of this agreement. If you disagree with any part of the terms then you may not access the service.</p>
+        
+        <h2 class="display-md" style="margin: 32px 0 16px;">2. Use of the Service</h2>
+        <p class="body-md" style="color: var(--color-body); margin-bottom: 24px;">Our tools are provided "as is" for informational and personal use. You agree to use our tools only for lawful purposes and in a way that does not infringe the rights of, restrict or inhibit anyone else's use of the website.</p>
+
+        <h2 class="display-md" style="margin: 32px 0 16px;">3. Accuracy Disclaimer</h2>
+        <p class="body-md" style="color: var(--color-body); margin-bottom: 24px;">While we strive for accuracy in measuring DPI and providing screen ruler functionalities, we cannot guarantee the exactness of the measurements due to hardware discrepancies, operating system configurations, and browser variances. The results should be treated as estimates.</p>
+        
+        <h2 class="display-md" style="margin: 32px 0 16px;">4. Intellectual Property</h2>
+        <p class="body-md" style="color: var(--color-body); margin-bottom: 24px;">The service and its original content, features, layout, design, data, and functionality are and will remain the exclusive property of My Mouse DPI and its licensors. Our trademarks and trade dress may not be used in connection with any product or service without our prior written consent.</p>
+        
+        <h2 class="display-md" style="margin: 32px 0 16px;">5. Limitation of Liability</h2>
+        <p class="body-md" style="color: var(--color-body); margin-bottom: 24px;">In no event shall My Mouse DPI, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service.</p>
+
+        <h2 class="display-md" style="margin: 32px 0 16px;">6. Modifications to Terms</h2>
+        <p class="body-md" style="color: var(--color-body); margin-bottom: 24px;">We reserve the right, at our sole discretion, to modify or replace these Terms at any time. By continuing to access or use our service after those revisions become effective, you agree to be bound by the revised terms.</p>
+
+        <h2 class="display-md" style="margin: 32px 0 16px;">7. Contact</h2>
+        <p class="body-md" style="color: var(--color-body); margin-bottom: 24px;">For any questions regarding these Terms & Conditions, please contact us at <a href="mailto:jasdeep97.dev@gmail.com" style="color: var(--color-link); text-decoration: none;">jasdeep97.dev@gmail.com</a>.</p>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .page-container {
+    padding: 48px 0 0;
+    margin-bottom: 64px;
+  }
+</style>
