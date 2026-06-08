@@ -1,0 +1,36 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout
+  title="Page Not Found — My Mouse DPI"
+  description="The page you are looking for does not exist."
+>
+  <Navbar />
+
+  <main class="error-page">
+    <div class="container" style="text-align: center;">
+      <h1 class="display-xl" style="margin: 0 0 16px;">404</h1>
+      <p class="body-lg" style="color: var(--color-body); margin: 0 0 32px;">
+        Oops! The page you are looking for doesn't exist or has been moved.
+      </p>
+      <a href="/" class="btn btn-primary">
+        Go Back Home
+      </a>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .error-page {
+    padding: 120px 0;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

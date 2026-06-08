@@ -1,0 +1,36 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout
+  title="Server Error — My Mouse DPI"
+  description="An internal server error occurred."
+>
+  <Navbar />
+
+  <main class="error-page">
+    <div class="container" style="text-align: center;">
+      <h1 class="display-xl" style="margin: 0 0 16px;">500</h1>
+      <p class="body-lg" style="color: var(--color-body); margin: 0 0 32px;">
+        Oops! Something went wrong on our end. Please try again later.
+      </p>
+      <a href="/" class="btn btn-primary">
+        Go Back Home
+      </a>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .error-page {
+    padding: 120px 0;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
