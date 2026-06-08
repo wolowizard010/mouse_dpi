@@ -10,19 +10,22 @@
       Enter your screen specifications for accurate measurements.
     </p>
 
-    <!-- Detection banner -->
-    <div class="detect-banner" id="detect-banner">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-        <span class="body-sm" style="color: var(--color-body);">Resolution detected</span>
-        <span class="caption-mono" id="detected-res-label" style="color: var(--color-mute);"></span>
+    <div class="unit-toggle" id="ruler-calibration-mode-toggle" style="margin-bottom: 16px; display: flex; width: 100%;">
+      <button class="unit-btn active" data-mode="preset" style="flex: 1; text-align: center;">Presets</button>
+      <button class="unit-btn" data-mode="manual" style="flex: 1; text-align: center;">Manual</button>
+    </div>
+
+    <div id="ruler-preset-group">
+      <div class="setting-group">
+        <label class="setting-label body-sm">Select Monitor</label>
+        <select class="input" id="ruler-preset-select" style="width: 100%; cursor: pointer;">
+          <!-- Options populated by JS -->
+        </select>
       </div>
-      <p class="body-sm" style="color: var(--color-mute); margin: 6px 0 0; font-size: 11px;">
-        Resolution auto-filled. Enter your screen diagonal to calibrate.
-      </p>
     </div>
 
     <!-- Manual calibration fields -->
-    <div class="manual-fields">
+    <div class="manual-fields" id="ruler-manual-entry-section" style="display: none;">
       <div class="setting-group">
         <label class="setting-label body-sm">Screen diagonal (inches)</label>
         <input
@@ -31,7 +34,7 @@
           id="screen-diagonal"
           placeholder="e.g. 15.6"
           min="5"
-          max="50"
+          max="100"
           step="0.1"
         />
       </div>
@@ -57,8 +60,9 @@
           />
         </div>
       </div>
-      <button class="btn btn-primary btn-sm" id="calc-ppi-btn" style="width: 100%;">Calculate PPI</button>
     </div>
+
+    <button class="btn btn-primary btn-sm" id="calc-ppi-btn" style="width: 100%; margin-top: 12px;">Calculate PPI</button>
 
     <!-- Unit toggle -->
     <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
@@ -234,23 +238,67 @@
   let currentPPI = 96; // Default PPI (CSS pixels)
   let rulerUnit: "cm" | "inch" = "cm";
   let isCalibrated = false;
+  let calibrationMode: "preset" | "manual" = "preset";
 
-  // Auto-detect resolution and pre-fill
-  const screenWidthInput = document.getElementById("screen-width") as HTMLInputElement;
-  const screenHeightInput = document.getElementById("screen-height") as HTMLInputElement;
+  const presetSelect = document.getElementById("ruler-preset-select") as HTMLSelectElement;
+  const presetGroup = document.getElementById("ruler-preset-group") as HTMLElement;
+  const manualEntrySection = document.getElementById("ruler-manual-entry-section") as HTMLElement;
 
-  // Use screen.width/height * devicePixelRatio for actual hardware resolution
-  const dpr = window.devicePixelRatio || 1;
-  const detectedWidth = Math.round(window.screen.width * dpr);
-  const detectedHeight = Math.round(window.screen.height * dpr);
-  screenWidthInput.value = String(detectedWidth);
-  screenHeightInput.value = String(detectedHeight);
+  // Presets definition
+  const MONITOR_PRESETS = [
+    { diagonal: 13.3, w: 1920, h: 1080, name: '13.3" 1080p (Laptop)' },
+    { diagonal: 14, w: 1920, h: 1080, name: '14" 1080p (Laptop)' },
+    { diagonal: 15.6, w: 1920, h: 1080, name: '15.6" 1080p (Laptop)' },
+    { diagonal: 14, w: 2560, h: 1600, name: '14" 1600p (Laptop)' },
+    { diagonal: 16, w: 2560, h: 1600, name: '16" 1600p (Laptop)' },
+    { diagonal: 16, w: 3456, h: 2234, name: '16" MacBook Pro' },
+    { diagonal: 24, w: 1920, h: 1080, name: '24" 1080p' },
+    { diagonal: 24.5, w: 1920, h: 1080, name: '24.5" 1080p' },
+    { diagonal: 27, w: 1920, h: 1080, name: '27" 1080p' },
+    { diagonal: 27, w: 2560, h: 1440, name: '27" 1440p' },
+    { diagonal: 27, w: 3840, h: 2160, name: '27" 4K' },
+    { diagonal: 32, w: 2560, h: 1440, name: '32" 1440p' },
+    { diagonal: 32, w: 3840, h: 2160, name: '32" 4K' },
+    { diagonal: 34, w: 3440, h: 1440, name: '34" Ultrawide' },
+    { diagonal: 38, w: 3840, h: 1600, name: '38" Ultrawide' }
+  ];
 
-  // Update detection banner label
-  const detectedResLabel = document.getElementById("detected-res-label") as HTMLElement;
-  if (detectedResLabel) {
-    detectedResLabel.textContent = `${detectedWidth} × ${detectedHeight}`;
+  function populatePresets() {
+    if (!presetSelect) return;
+    presetSelect.innerHTML = "";
+    
+    MONITOR_PRESETS.forEach((p, index) => {
+      const option = document.createElement("option");
+      option.value = index.toString();
+      option.textContent = p.name;
+      presetSelect.appendChild(option);
+    });
+
+    if (MONITOR_PRESETS.length > 0) {
+      presetSelect.value = "0";
+    }
   }
+
+  populatePresets();
+
+  // Calibration mode toggle
+  document.querySelectorAll("#ruler-calibration-mode-toggle .unit-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#ruler-calibration-mode-toggle .unit-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      calibrationMode = (btn as HTMLElement).dataset.mode as "preset" | "manual";
+      
+      if (calibrationMode === "preset") {
+        presetGroup.style.display = "block";
+        manualEntrySection.style.display = "none";
+      } else {
+        presetGroup.style.display = "none";
+        manualEntrySection.style.display = "block";
+      }
+    });
+  });
+
+  const dpr = window.devicePixelRatio || 1;
 
   // Try to load saved PPI
   const savedPPI = localStorage.getItem("screenPPI");
@@ -280,19 +328,31 @@
     localStorage.setItem("screenPPI", String(currentPPI));
   }
 
-  // Manual PPI calculation
+  // PPI calculation
   calcPpiBtn?.addEventListener("click", () => {
-    const diagonal = parseFloat((document.getElementById("screen-diagonal") as HTMLInputElement).value);
-    const width = parseInt((document.getElementById("screen-width") as HTMLInputElement).value);
-    const height = parseInt((document.getElementById("screen-height") as HTMLInputElement).value);
+    let diagonal = 0;
+    let width = 0;
+    let height = 0;
+    
+    if (calibrationMode === "preset") {
+      const selectedIndex = parseInt(presetSelect.value);
+      const preset = MONITOR_PRESETS[selectedIndex];
+      if (preset) {
+        diagonal = preset.diagonal;
+        width = preset.w;
+        height = preset.h;
+      }
+    } else {
+      diagonal = parseFloat((document.getElementById("screen-diagonal") as HTMLInputElement).value);
+      width = parseInt((document.getElementById("screen-width") as HTMLInputElement).value);
+      height = parseInt((document.getElementById("screen-height") as HTMLInputElement).value);
+    }
 
     if (diagonal > 0 && width > 0 && height > 0) {
       const diagonalPixels = Math.sqrt(width * width + height * height);
       // Physical PPI = diagonal pixels / diagonal inches
       const physicalPPI = diagonalPixels / diagonal;
       // Convert to CSS-pixel PPI (what the canvas uses)
-      // Since browser coordinates are in CSS pixels, and devicePixelRatio
-      // maps CSS pixels to physical pixels, we divide by DPR
       currentPPI = physicalPPI / dpr;
       updateCalibrationStatus();
       drawRuler();
@@ -300,6 +360,8 @@
 
       // Dispatch PPI update
       dispatchPPI();
+    } else {
+      alert("Please ensure all fields are correctly filled.");
     }
   });
 
