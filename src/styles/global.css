@@ -421,3 +421,17 @@ img {
 .delay-3 { animation-delay: 0.3s; }
 .delay-4 { animation-delay: 0.4s; }
 .delay-5 { animation-delay: 0.5s; }
+
+/* ─── Logo theme switching ─── */
+.logo-img-light {
+  display: inline-block !important;
+}
+.logo-img-dark {
+  display: none !important;
+}
+[data-theme="dark"] .logo-img-light {
+  display: none !important;
+}
+[data-theme="dark"] .logo-img-dark {
+  display: inline-block !important;
+}

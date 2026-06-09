@@ -19,10 +19,8 @@ const navLinks = [
   <div class="navbar-inner container">
     <!-- Logo -->
     <a href={getRelativeLocaleUrl(lang, "")} class="navbar-logo" id="nav-logo">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor"/>
-        <path d="M8 7L8 17M12 10L12 17M16 7L16 17" stroke="var(--color-on-primary)" stroke-width="2" stroke-linecap="round"/>
-      </svg>
+      <img src="/logo-light.svg" alt="Logo" class="logo-img logo-img-light" width="24" height="24" />
+      <img src="/logo-dark.svg" alt="Logo" class="logo-img logo-img-dark" width="24" height="24" />
       <span>{t("nav.logo")}</span>
     </a>
 
@@ -148,6 +146,12 @@ const navLinks = [
     color: var(--color-ink);
     flex-shrink: 0;
     text-decoration: none;
+  }
+
+  .logo-img {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
   }
 
   .navbar-links {

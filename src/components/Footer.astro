@@ -37,10 +37,8 @@ const footerSections = [
       <!-- Brand column -->
       <div class="footer-brand">
         <a href={getRelativeLocaleUrl(lang, "")} class="footer-logo">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor"/>
-            <path d="M8 7L8 17M12 10L12 17M16 7L16 17" stroke="var(--color-on-primary)" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          <img src="/logo-light.svg" alt="Logo" class="logo-img logo-img-light" width="20" height="20" />
+          <img src="/logo-dark.svg" alt="Logo" class="logo-img logo-img-dark" width="20" height="20" />
           <span>{t("nav.logo")}</span>
         </a>
         <p class="footer-tagline" set:html={t("footer.tagline")}></p>
@@ -95,6 +93,12 @@ const footerSections = [
     font-weight: 600;
     color: var(--color-ink);
     text-decoration: none;
+  }
+
+  .logo-img {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
   }
 
   .footer-tagline {
