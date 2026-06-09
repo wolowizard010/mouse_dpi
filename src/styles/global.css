@@ -44,15 +44,15 @@
 }
 
 [data-theme="dark"] {
-  --c-ink: #ededed;
-  --c-on-primary: #0a0a0a;
-  --c-body: #a1a1a1;
-  --c-mute: #666666;
-  --c-hairline: #2a2a2a;
-  --c-hairline-strong: #444444;
-  --c-canvas: #0a0a0a;
-  --c-canvas-soft: #111111;
-  --c-canvas-soft-2: #1a1a1a;
+  --c-ink: #f5f5f7;
+  --c-on-primary: #121316;
+  --c-body: #bebec5;
+  --c-mute: #7e7f86;
+  --c-hairline: #2b2c32;
+  --c-hairline-strong: #454752;
+  --c-canvas: #1a1b1f;
+  --c-canvas-soft: #121316;
+  --c-canvas-soft-2: #24252a;
   --c-link: #3291ff;
   --c-link-deep: #5ba4ff;
   --c-success: #3291ff;
@@ -69,14 +69,14 @@
   --c-shadow-xl: 0px 1px 1px rgba(0,0,0,0.15), 0px 8px 16px -4px rgba(0,0,0,0.2), 0px 24px 32px -8px rgba(0,0,0,0.25);
 
   /* Card borders */
-  --c-card-border: rgba(255, 255, 255, 0.08);
-  --c-card-border-hover: rgba(255, 255, 255, 0.12);
+  --c-card-border: rgba(255, 255, 255, 0.06);
+  --c-card-border-hover: rgba(255, 255, 255, 0.1);
 
   /* Overlays */
-  --c-overlay: rgba(10, 10, 10, 0.85);
-  --c-navbar-bg: rgba(10, 10, 10, 0.8);
-  --c-selection-bg: #ededed;
-  --c-selection-fg: #0a0a0a;
+  --c-overlay: rgba(26, 27, 31, 0.85);
+  --c-navbar-bg: rgba(18, 19, 22, 0.8);
+  --c-selection-bg: #f5f5f7;
+  --c-selection-fg: #121316;
 
   /* Mesh gradient opacities — subtler in dark */
   --c-mesh-1: rgba(0, 124, 240, 0.1);
@@ -119,11 +119,11 @@
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 
   /* Border radius */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-pill: 100px;
   --radius-full: 9999px;
 
