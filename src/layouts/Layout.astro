@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { getCleanPath } from "../i18n/utils";
 
 interface Props {
   title?: string;
@@ -11,15 +13,20 @@ interface Props {
 const {
   title = "Mouse DPI Analyze — Accurate Measurement Tool",
   description = "Measure your mouse DPI with precision. Free online Mouse DPI Analyze tool with screen calibration and real-time calculation.",
-  canonicalUrl = Astro.url.href,
   image = "/og-image.png",
 } = Astro.props;
 
+const lang = Astro.currentLocale || "en";
+const relativePath = getCleanPath(Astro.url.pathname);
+const siteUrl = Astro.site || new URL("https://mousedpianalyzer.com");
+const canonical = new URL(getRelativeLocaleUrl(lang, relativePath), siteUrl).href;
+
 const siteName = "My Mouse DPI";
+const locales = ["de", "fr", "es", "it", "nl", "pl", "pt", "ru", "zh", "sv", "da", "no", "fi"];
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang={lang} data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -43,14 +50,28 @@ const siteName = "My Mouse DPI";
     <!-- SEO -->
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalUrl} />
+    <link rel="canonical" href={canonical} />
     <meta name="generator" content={Astro.generator} />
+
+    <!-- Hreflang Alternate Links for International SEO -->
+    <link rel="alternate" hreflang="x-default" href={new URL(getRelativeLocaleUrl("en", relativePath), siteUrl).href} />
+    <link rel="alternate" hreflang="en" href={new URL(getRelativeLocaleUrl("en", relativePath), siteUrl).href} />
+    {locales.map((locale) => {
+      const hreflang = locale === "zh" ? "zh-Hans" : locale;
+      return (
+        <link
+          rel="alternate"
+          hreflang={hreflang}
+          href={new URL(getRelativeLocaleUrl(locale, relativePath), siteUrl).href}
+        />
+      );
+    })}
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:image" content={new URL(image, Astro.url)} />
 

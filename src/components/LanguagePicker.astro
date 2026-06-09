@@ -1,0 +1,179 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { languages } from "../i18n/ui";
+import { getCleanPath } from "../i18n/utils";
+
+const currentLang = Astro.currentLocale || "en";
+const relativePath = getCleanPath(Astro.url.pathname);
+---
+
+<div class="lang-picker" id="lang-picker">
+  <button class="lang-btn" id="lang-picker-btn" aria-label="Select language" aria-haspopup="listbox">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="2" y1="12" x2="22" y2="12"></line>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+    </svg>
+    <span class="lang-label">{currentLang.toUpperCase()}</span>
+    <svg class="lang-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </button>
+  <div class="lang-dropdown" id="lang-picker-dropdown" role="listbox">
+    <div class="lang-dropdown-inner">
+      {Object.entries(languages).map(([locale, label]) => {
+        const active = locale === currentLang;
+        const targetUrl = getRelativeLocaleUrl(locale, relativePath);
+        return (
+          <a
+            href={targetUrl}
+            class:list={["lang-item", { active }]}
+            role="option"
+            aria-selected={active ? "true" : "false"}
+          >
+            <span class="lang-item-name">{label}</span>
+            <span class="lang-item-code">{locale.toUpperCase()}</span>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</div>
+
+<style>
+  .lang-picker {
+    position: relative;
+    display: inline-block;
+  }
+
+  .lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-full);
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .lang-btn:hover {
+    background: var(--color-canvas-soft-2);
+    border-color: var(--color-hairline-strong);
+  }
+
+  .lang-chevron {
+    transition: transform 0.2s ease;
+    color: var(--color-mute);
+  }
+
+  .lang-picker.open .lang-chevron {
+    transform: rotate(180deg);
+  }
+
+  .lang-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 1000;
+    width: 180px;
+    max-height: 280px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s 0.15s;
+    background: var(--c-overlay);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .lang-picker.open .lang-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s 0s;
+  }
+
+  .lang-dropdown-inner {
+    padding: 4px;
+  }
+
+  .lang-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: var(--radius-xs);
+    color: var(--color-body);
+    font-size: 12px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .lang-item:hover {
+    background: var(--color-canvas-soft-2);
+    color: var(--color-ink);
+  }
+
+  .lang-item.active {
+    background: var(--color-canvas-soft-2);
+    color: var(--color-link);
+    font-weight: 500;
+  }
+
+  .lang-item-code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-mute);
+  }
+
+  .lang-item.active .lang-item-code {
+    color: var(--color-link);
+  }
+
+  /* Custom scrollbar for dropdown */
+  .lang-dropdown::-webkit-scrollbar {
+    width: 6px;
+  }
+  .lang-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .lang-dropdown::-webkit-scrollbar-thumb {
+    background: var(--color-hairline-strong);
+    border-radius: var(--radius-full);
+  }
+</style>
+
+<script>
+  const picker = document.getElementById("lang-picker");
+  const btn = document.getElementById("lang-picker-btn");
+
+  btn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    picker?.classList.toggle("open");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (picker?.classList.contains("open") && !picker.contains(e.target as Node)) {
+      picker.classList.remove("open");
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && picker?.classList.contains("open")) {
+      picker.classList.remove("open");
+      btn?.focus();
+    }
+  });
+</script>

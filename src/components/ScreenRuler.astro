@@ -1,23 +1,27 @@
 ---
 // ScreenRuler.astro — On-screen ruler with manual screen calibration
 // Uses screen diagonal + resolution for accurate PPI calculation
+import { useTranslations } from "../i18n/utils";
+
+const lang = Astro.currentLocale || 'en';
+const t = useTranslations(lang);
 ---
 
-<section class="ruler-section" id="screen-ruler">
+<section class="ruler-section" id="screen-ruler" data-translations={JSON.stringify(t("rulerToolStrings"))} data-lang={lang}>
   <div class="ruler-controls card" id="ruler-controls">
-    <h3 class="display-sm" style="margin: 0 0 16px;">Calibration</h3>
+    <h3 class="display-sm" style="margin: 0 0 16px;">{t("rulerToolStrings.calibration")}</h3>
     <p class="body-sm" style="color: var(--color-body); margin: 0 0 16px;">
-      Enter your screen specifications for accurate measurements.
+      {t("rulerToolStrings.enterSpecs")}
     </p>
 
     <div class="unit-toggle" id="ruler-calibration-mode-toggle" style="margin-bottom: 16px; display: flex; width: 100%;">
-      <button class="unit-btn active" data-mode="preset" style="flex: 1; text-align: center;">Presets</button>
-      <button class="unit-btn" data-mode="manual" style="flex: 1; text-align: center;">Manual</button>
+      <button class="unit-btn active" data-mode="preset" style="flex: 1; text-align: center;">{t("rulerToolStrings.presets")}</button>
+      <button class="unit-btn" data-mode="manual" style="flex: 1; text-align: center;">{t("rulerToolStrings.manual")}</button>
     </div>
 
     <div id="ruler-preset-group">
       <div class="setting-group">
-        <label class="setting-label body-sm">Select Monitor</label>
+        <label class="setting-label body-sm">{t("rulerToolStrings.selectMonitor")}</label>
         <select class="input" id="ruler-preset-select" style="width: 100%; cursor: pointer;">
           <!-- Options populated by JS -->
         </select>
@@ -27,7 +31,7 @@
     <!-- Manual calibration fields -->
     <div class="manual-fields" id="ruler-manual-entry-section" style="display: none;">
       <div class="setting-group">
-        <label class="setting-label body-sm">Screen diagonal (inches)</label>
+        <label class="setting-label body-sm">{t("rulerToolStrings.screenDiagonal")}</label>
         <input
           type="number"
           class="input"
@@ -39,7 +43,7 @@
         />
       </div>
       <div class="setting-group">
-        <label class="setting-label body-sm">Resolution</label>
+        <label class="setting-label body-sm">{t("rulerToolStrings.resolution")}</label>
         <div class="resolution-inputs">
           <input
             type="number"
@@ -62,21 +66,21 @@
       </div>
     </div>
 
-    <button class="btn btn-primary btn-sm" id="calc-ppi-btn" style="width: 100%; margin-top: 12px;">Calibrate</button>
+    <button class="btn btn-primary btn-sm" id="calc-ppi-btn" style="width: 100%; margin-top: 12px;">{t("rulerToolStrings.calibrateBtn")}</button>
 
     <!-- Unit toggle -->
     <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
-      <span class="body-sm" style="color: var(--color-body); font-weight: 500;">Ruler unit</span>
+      <span class="body-sm" style="color: var(--color-body); font-weight: 500;">{t("rulerToolStrings.rulerUnit")}</span>
       <div class="unit-toggle" id="ruler-unit-toggle">
-        <button class="unit-btn active" data-unit="cm" id="ruler-unit-cm">cm</button>
-        <button class="unit-btn" data-unit="inch" id="ruler-unit-inch">inch</button>
+        <button class="unit-btn active" data-unit="cm" id="ruler-unit-cm">{t("rulerToolStrings.cm")}</button>
+        <button class="unit-btn" data-unit="inch" id="ruler-unit-inch">{t("rulerToolStrings.inch")}</button>
       </div>
     </div>
 
     <!-- Calibration status -->
     <div class="calibration-status" id="calibration-status">
       <div class="status-dot" id="status-dot"></div>
-      <span class="body-sm" id="calibration-status-text">Not calibrated</span>
+      <span class="body-sm" id="calibration-status-text">{t("rulerToolStrings.notCalibrated")}</span>
     </div>
   </div>
 
@@ -87,7 +91,7 @@
     </div>
     <div class="ruler-info">
       <span class="caption-mono" style="color: var(--color-mute);">
-        Use calibration for accurate real-world measurements
+        {t("rulerToolStrings.rulerHint")}
       </span>
     </div>
   </div>
@@ -229,6 +233,27 @@
 
 <script>
   // ─── Screen Ruler Engine ───
+  const screenRulerEl = document.getElementById("screen-ruler") as HTMLElement;
+  const langCode = screenRulerEl?.dataset.lang || "en";
+  const tStrings = JSON.parse(screenRulerEl?.dataset.translations || "{}");
+
+  const LAPTOP_TRANSLATIONS: Record<string, string> = {
+    en: "Laptop",
+    de: "Laptop",
+    fr: "Ordinateur portable",
+    es: "Portátil",
+    it: "Portatile",
+    nl: "Laptop",
+    pl: "Laptop",
+    pt: "Notebook",
+    ru: "Ноутбук",
+    zh: "笔记本电脑",
+    sv: "Bärbar dator",
+    da: "Bærbar",
+    no: "Bærbar",
+    fi: "Kannettava"
+  };
+
   const canvas = document.getElementById("ruler-canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d")!;
   const statusDot = document.getElementById("status-dot") as HTMLElement;
@@ -267,10 +292,11 @@
     if (!presetSelect) return;
     presetSelect.innerHTML = "";
     
+    const laptopWord = LAPTOP_TRANSLATIONS[langCode] || "Laptop";
     MONITOR_PRESETS.forEach((p, index) => {
       const option = document.createElement("option");
       option.value = index.toString();
-      option.textContent = p.name;
+      option.textContent = p.name.replace("Laptop", laptopWord);
       presetSelect.appendChild(option);
     });
 
@@ -321,7 +347,7 @@
   function updateCalibrationStatus() {
     isCalibrated = true;
     if (statusDot) statusDot.classList.add("calibrated");
-    if (statusText) statusText.textContent = `Calibrated`;
+    if (statusText) statusText.textContent = tStrings.calibrated || "Calibrated";
   }
 
   function savePPI() {
@@ -361,7 +387,7 @@
       // Dispatch PPI update
       dispatchPPI();
     } else {
-      alert("Please ensure all fields are correctly filled.");
+      alert(tStrings.fillAllFieldsError || "Please ensure all fields are correctly filled.");
     }
   });
 
@@ -474,7 +500,7 @@
     ctx.fillStyle = colors.unitLabel;
     ctx.font = "400 11px 'Geist Mono', monospace";
     ctx.textAlign = "left";
-    ctx.fillText(rulerUnit === "cm" ? "cm" : "inches", 6, 75);
+    ctx.fillText(rulerUnit === "cm" ? tStrings.cm : tStrings.inch, 6, 75);
 
     // Draw bottom edge
     ctx.fillStyle = colors.dividerLine;
@@ -486,7 +512,7 @@
     ctx.fillStyle = colors.infoText;
     ctx.font = "400 11px 'Geist Mono', monospace";
     ctx.textAlign = "center";
-    ctx.fillText(`${rulerUnit === "cm" ? "Centimeters" : "Inches"}`, displayWidth / 2, 105);
+    ctx.fillText(`${rulerUnit === "cm" ? tStrings.rulerLabelCm : tStrings.rulerLabelInches}`, displayWidth / 2, 105);
   }
 
   // Initialize

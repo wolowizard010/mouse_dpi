@@ -1,0 +1,44 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../Navbar.astro";
+import Footer from "../Footer.astro";
+import { useTranslations } from "../../i18n/utils";
+
+const lang = Astro.currentLocale || 'en';
+const t = useTranslations(lang);
+
+const sections = t("terms.sections") as Array<{ title: string; content: string }>;
+---
+
+<Layout
+  title={t("terms.metaTitle")}
+  description={t("terms.metaDesc")}
+>
+  <Navbar />
+  <main class="page-container container">
+    <div style="max-width: 720px;">
+      <div style="margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--color-hairline);">
+        <span class="caption-mono" style="color: var(--color-mute);">{t("footer.company")}</span>
+        <h1 class="display-lg" style="margin: 8px 0 0;">{t("terms.title")}</h1>
+      </div>
+      <div class="content">
+        <p class="body-md" style="color: var(--color-mute); margin-bottom: 32px;">{t("terms.lastUpdated")}: {new Date().toLocaleDateString(lang)}</p>
+        
+        {sections.map((section) => (
+          <div>
+            <h2 class="display-md" style="margin: 32px 0 16px;">{section.title}</h2>
+            <p class="body-md" style="color: var(--color-body); margin-bottom: 24px;">{section.content}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .page-container {
+    padding: 48px 0 0;
+    margin-bottom: 64px;
+  }
+</style>

@@ -1,39 +1,52 @@
 ---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { useTranslations } from "../i18n/utils";
+import LanguagePicker from "./LanguagePicker.astro";
+
+const lang = Astro.currentLocale || 'en';
+const t = useTranslations(lang);
 const currentPath = Astro.url.pathname;
 
 const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "DPI Analyzer", href: "/dpi-analyzer" },
-  { label: "Screen Ruler", href: "/screen-ruler" },
-  { label: "How It Works", href: "/how-it-works" },
+  { label: t("nav.home"), path: "" },
+  { label: t("nav.dpiAnalyzer"), path: "dpi-analyzer" },
+  { label: t("nav.screenRuler"), path: "screen-ruler" },
+  { label: t("nav.howItWorks"), path: "how-it-works" },
 ];
 ---
 
 <nav class="navbar" id="main-nav">
   <div class="navbar-inner container">
     <!-- Logo -->
-    <a href="/" class="navbar-logo" id="nav-logo">
+    <a href={getRelativeLocaleUrl(lang, "")} class="navbar-logo" id="nav-logo">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor"/>
         <path d="M8 7L8 17M12 10L12 17M16 7L16 17" stroke="var(--color-on-primary)" stroke-width="2" stroke-linecap="round"/>
       </svg>
-      <span>My Mouse DPI</span>
+      <span>{t("nav.logo")}</span>
     </a>
 
     <!-- Desktop Links -->
     <div class="navbar-links" id="nav-links">
-      {navLinks.map((link) => (
-        <a
-          href={link.href}
-          class:list={["navbar-link", { active: currentPath === link.href || (link.href !== "/" && currentPath.startsWith(link.href)) }]}
-        >
-          {link.label}
-        </a>
-      ))}
+      {navLinks.map((link) => {
+        const href = getRelativeLocaleUrl(lang, link.path);
+        const active = currentPath === href || (link.path !== "" && currentPath.includes(link.path));
+        return (
+          <a
+            href={href}
+            class:list={["navbar-link", { active }]}
+          >
+            {link.label}
+          </a>
+        );
+      })}
     </div>
 
-    <!-- Actions (theme + CTA) -->
+    <!-- Actions (language + theme + CTA) -->
     <div class="navbar-actions">
+      <!-- Language Picker -->
+      <LanguagePicker />
+
       <!-- Theme toggle -->
       <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
         <!-- Sun icon (shown in dark mode) -->
@@ -54,8 +67,8 @@ const navLinks = [
         </svg>
       </button>
 
-      <a href="/dpi-analyzer" class="btn btn-primary btn-sm" id="nav-cta">
-        Test DPI
+      <a href={getRelativeLocaleUrl(lang, "dpi-analyzer")} class="btn btn-primary btn-sm" id="nav-cta">
+        {t("nav.testDpi")}
       </a>
     </div>
 
@@ -69,14 +82,18 @@ const navLinks = [
 
   <!-- Mobile Menu -->
   <div class="navbar-mobile" id="nav-mobile">
-    {navLinks.map((link) => (
-      <a
-        href={link.href}
-        class:list={["navbar-mobile-link", { active: currentPath === link.href }]}
-      >
-        {link.label}
-      </a>
-    ))}
+    {navLinks.map((link) => {
+      const href = getRelativeLocaleUrl(lang, link.path);
+      const active = currentPath === href;
+      return (
+        <a
+          href={href}
+          class:list={["navbar-mobile-link", { active }]}
+        >
+          {link.label}
+        </a>
+      );
+    })}
     <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
       <button class="theme-toggle" id="theme-toggle-mobile" aria-label="Toggle dark mode">
         <svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -94,8 +111,8 @@ const navLinks = [
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
       </button>
-      <a href="/dpi-analyzer" class="btn btn-primary btn-sm" style="flex: 1;">
-        Test DPI
+      <a href={getRelativeLocaleUrl(lang, "dpi-analyzer")} class="btn btn-primary btn-sm" style="flex: 1;">
+        {t("nav.testDpi")}
       </a>
     </div>
   </div>

@@ -1,0 +1,129 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../Navbar.astro";
+import Footer from "../Footer.astro";
+import { useTranslations } from "../../i18n/utils";
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+const lang = Astro.currentLocale || 'en';
+const t = useTranslations(lang);
+---
+
+<Layout
+  title={t("about.metaTitle")}
+  description={t("about.metaDesc")}
+>
+  <Navbar />
+
+  <main class="about-page">
+    <div class="container">
+      <div class="about-layout">
+        <article class="about-content">
+          <div class="page-header">
+            <span class="caption-mono" style="color: var(--color-mute);">{t("nav.about")}</span>
+            <h1 class="display-lg" style="margin: 8px 0 0;">{t("about.title")}</h1>
+          </div>
+
+          <section class="content-section">
+            <p class="body-lg" style="color: var(--color-body);">
+              {t("about.desc1")}
+            </p>
+          </section>
+
+          <section class="content-section">
+            <h2 class="display-md">{t("about.whyTitle")}</h2>
+            <p class="body-md" style="color: var(--color-body);">
+              {t("about.whyDesc1")}
+            </p>
+            <p class="body-md" style="color: var(--color-body);" set:html={t("about.whyDesc2")}>
+            </p>
+          </section>
+
+          <section class="content-section">
+            <h2 class="display-md">{t("about.privacyTitle")}</h2>
+            <p class="body-md" style="color: var(--color-body);">
+              {t("about.privacyDesc")}
+            </p>
+          </section>
+
+          <section class="content-section">
+            <h2 class="display-md">{t("about.browserTitle")}</h2>
+            <p class="body-md" style="color: var(--color-body);">
+              {t("about.browserDesc")}
+            </p>
+            <div class="browser-list">
+              <div class="browser-item">
+                <span class="body-sm" style="font-weight: 500;">Chrome</span>
+              </div>
+              <div class="browser-item">
+                <span class="body-sm" style="font-weight: 500;">Firefox</span>
+              </div>
+              <div class="browser-item">
+                <span class="body-sm" style="font-weight: 500;">Edge</span>
+              </div>
+              <div class="browser-item">
+                <span class="body-sm" style="font-weight: 500;">Safari</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="content-section" style="text-align: center; padding: 32px 0;">
+            <a href={getRelativeLocaleUrl(lang, "dpi-analyzer")} class="btn btn-primary">
+              {t("about.btn")}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </section>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .about-page {
+    padding: 48px 0 0;
+  }
+
+  .page-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .about-layout {
+    max-width: 720px;
+  }
+
+  .content-section {
+    margin-bottom: 48px;
+  }
+
+  .content-section h2 {
+    margin: 0 0 16px;
+  }
+
+  .content-section p {
+    margin: 0 0 16px;
+  }
+
+  .browser-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .browser-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--color-canvas-soft);
+    border-radius: var(--radius-sm);
+  }
+</style>

@@ -1,16 +1,20 @@
 ---
 // DpiTool.astro — Core DPI measurement engine
 // Uses Pointer Lock API for accurate, unaccelerated mouse movement tracking
+import { useTranslations } from "../i18n/utils";
+
+const lang = Astro.currentLocale || 'en';
+const t = useTranslations(lang);
 ---
 
-<section class="dpi-tool" id="dpi-tool">
+<section class="dpi-tool" id="dpi-tool" data-translations={JSON.stringify(t("dpiToolStrings"))} data-lang={lang}>
   <div class="tool-layout">
     <!-- Settings Panel -->
     <div class="tool-settings card" id="settings-panel">
-      <h3 class="display-sm" style="margin: 0 0 20px;">Settings</h3>
+      <h3 class="display-sm" style="margin: 0 0 20px;">{t("dpiToolStrings.settings")}</h3>
 
       <div class="setting-group">
-        <label class="setting-label body-sm">Target Distance</label>
+        <label class="setting-label body-sm">{t("dpiToolStrings.targetDistance")}</label>
         <div class="setting-row">
           <input
             type="number"
@@ -22,19 +26,24 @@
             step="0.5"
           />
           <div class="unit-toggle" id="unit-toggle">
-            <button class="unit-btn active" data-unit="inch" id="unit-inch">inch</button>
-            <button class="unit-btn" data-unit="cm" id="unit-cm">cm</button>
+            <button class="unit-btn active" data-unit="inch" id="unit-inch">{t("dpiToolStrings.inch")}</button>
+            <button class="unit-btn" data-unit="cm" id="unit-cm">{t("dpiToolStrings.cm")}</button>
           </div>
         </div>
       </div>
 
       <div class="setting-group">
-        <label class="setting-label body-sm">Configured DPI <span class="optional">(optional)</span></label>
+        <label class="setting-label body-sm">
+          {t("dpiToolStrings.configuredDpi")}
+          <span class="optional">
+            ({lang === 'zh' ? '可选' : (lang === 'ru' ? 'опционально' : (lang === 'de' ? 'optional' : (lang === 'fr' ? 'optionnel' : (lang === 'es' ? 'opcional' : (lang === 'it' ? 'opzionale' : (lang === 'nl' ? 'optioneel' : (lang === 'pl' ? 'opcjonalnie' : (lang === 'pt' ? 'opcional' : (lang === 'sv' ? 'valfritt' : (lang === 'da' ? 'valgfrit' : (lang === 'no' ? 'valgfritt' : (lang === 'fi' ? 'valinnainen' : 'optional'))))))))))))})
+          </span>
+        </label>
         <input
           type="number"
           class="input"
           id="configured-dpi"
-          placeholder="e.g. 800"
+          placeholder={t("dpiToolStrings.configuredDpiPlaceholder")}
           min="100"
           max="32000"
           step="50"
@@ -44,21 +53,21 @@
       <div class="setting-group" style="background: var(--color-canvas-soft); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-hairline);">
         <div class="setting-row" style="align-items: center; cursor: pointer;">
           <input type="checkbox" id="virtual-ruler-cb" style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--color-link);" />
-          <label for="virtual-ruler-cb" class="body-sm" style="margin-left: 8px; cursor: pointer; font-weight: 500;">Use virtual ruler for measurement</label>
+          <label for="virtual-ruler-cb" class="body-sm" style="margin-left: 8px; cursor: pointer; font-weight: 500;">{t("dpiToolStrings.useVirtualRuler")}</label>
         </div>
       </div>
 
       <div id="calibration-settings" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-hairline); transition: background 0.3s ease; border-radius: var(--radius-sm); padding-left: 8px; padding-right: 8px;">
-        <h4 class="body-sm" style="font-weight: 500; margin: 0 0 12px;">Screen Calibration</h4>
-        <button class="btn btn-secondary btn-sm" id="open-calibration-btn" style="width: 100%;">Calibrate Screen</button>
-        <div class="body-sm" id="calibration-status-text" style="color: var(--color-mute); margin-top: 8px; text-align: center;">Not calibrated</div>
+        <h4 class="body-sm" style="font-weight: 500; margin: 0 0 12px;">{t("dpiToolStrings.screenCalibration")}</h4>
+        <button class="btn btn-secondary btn-sm" id="open-calibration-btn" style="width: 100%;">{t("dpiToolStrings.calibrateScreen")}</button>
+        <div class="body-sm" id="calibration-status-text" style="color: var(--color-mute); margin-top: 8px; text-align: center;">{t("dpiToolStrings.notCalibrated")}</div>
       </div>
 
       <div class="setting-group">
-        <label class="setting-label body-sm">Axis</label>
+        <label class="setting-label body-sm">{t("dpiToolStrings.axis")}</label>
         <div class="unit-toggle" id="axis-toggle">
-          <button class="unit-btn active" data-axis="x" id="axis-x">Horizontal</button>
-          <button class="unit-btn" data-axis="y" id="axis-y">Vertical</button>
+          <button class="unit-btn active" data-axis="x" id="axis-x">{t("dpiToolStrings.horizontal")}</button>
+          <button class="unit-btn" data-axis="y" id="axis-y">{t("dpiToolStrings.vertical")}</button>
         </div>
       </div>
 
@@ -67,17 +76,17 @@
           <polyline points="1 4 1 10 7 10"></polyline>
           <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
         </svg>
-        Reset
+        {t("dpiToolStrings.reset")}
       </button>
 
       <!-- Instructions -->
       <div class="instructions card-soft" style="margin-top: 20px; padding: 16px;">
-        <p class="caption-mono" style="margin: 0 0 8px; color: var(--color-mute);">How to test</p>
+        <p class="caption-mono" style="margin: 0 0 8px; color: var(--color-mute);">{t("dpiToolStrings.howToTest")}</p>
         <ol class="instruction-list body-sm">
-          <li>Set your target distance</li>
-          <li>Click the test area to lock cursor</li>
-          <li>Move your mouse the target distance</li>
-          <li>Click again to finish measuring</li>
+          <li>{t("dpiToolStrings.testStep1")}</li>
+          <li>{t("dpiToolStrings.testStep2")}</li>
+          <li>{t("dpiToolStrings.testStep3")}</li>
+          <li>{t("dpiToolStrings.testStep4")}</li>
         </ol>
       </div>
     </div>
@@ -104,19 +113,19 @@
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 3l14 9-14 9V3z"></path>
               </svg>
-              <span class="body-md" id="test-prompt-title" style="font-weight: 500;">Click to start measuring</span>
-              <span class="body-sm" id="test-prompt-desc" style="color: var(--color-mute);">Cursor will be locked for accurate tracking</span>
+              <span class="body-md" id="test-prompt-title" style="font-weight: 500;">{t("dpiToolStrings.clickToStart")}</span>
+              <span class="body-sm" id="test-prompt-desc" style="color: var(--color-mute);">{t("dpiToolStrings.cursorLockedDesc")}</span>
             </div>
           </div>
 
           <!-- Active state info -->
           <div class="test-active-info" id="test-active-info" style="display: none;">
             <div class="live-counter">
-              <span class="caption-mono" style="color: var(--color-mute);">Pixels moved</span>
+              <span class="caption-mono" style="color: var(--color-mute);">{t("dpiToolStrings.pixelsMoved")}</span>
               <span class="live-pixels display-lg" id="live-pixels">0</span>
             </div>
             <div class="live-direction" id="live-direction">
-              <span class="caption-mono" id="direction-label" style="color: var(--color-mute);">Move mouse →</span>
+              <span class="caption-mono" id="direction-label" style="color: var(--color-mute);">{t("dpiToolStrings.moveMouseRight")}</span>
             </div>
             
             <div id="on-screen-ruler-wrapper" style="display: none; width: 100%; max-width: 800px; border-radius: var(--radius-sm); margin-top: 16px;">
@@ -132,34 +141,34 @@
       <!-- Real-time stats bar -->
       <div class="live-stats" id="live-stats">
         <div class="live-stat">
-          <span class="caption-mono">PIXELS</span>
+          <span class="caption-mono">{t("dpiToolStrings.pixelsLabel")}</span>
           <span class="stat-value code-text" id="stat-pixels">0</span>
         </div>
         <div class="live-stat-divider"></div>
         <div class="live-stat">
-          <span class="caption-mono">DISTANCE</span>
+          <span class="caption-mono">{t("dpiToolStrings.distanceLabel")}</span>
           <span class="stat-value code-text" id="stat-distance">0.00 in</span>
         </div>
         <div class="live-stat-divider"></div>
         <div class="live-stat">
-          <span class="caption-mono">DPI</span>
+          <span class="caption-mono">{t("dpiToolStrings.dpiLabel")}</span>
           <span class="stat-value code-text" id="stat-dpi">—</span>
         </div>
         <div class="live-stat-divider"></div>
         <div class="live-stat">
-          <span class="caption-mono">STATUS</span>
-          <span class="stat-value stat-status code-text" id="stat-status">Ready</span>
+          <span class="caption-mono">{t("dpiToolStrings.statusLabel")}</span>
+          <span class="stat-value stat-status code-text" id="stat-status">{t("dpiToolStrings.statusReady")}</span>
         </div>
       </div>
     </div>
 
     <!-- Results Panel -->
     <div class="tool-results card" id="results-panel">
-      <h3 class="display-sm" style="margin: 0 0 20px;">Results</h3>
+      <h3 class="display-sm" style="margin: 0 0 20px;">{t("dpiToolStrings.results")}</h3>
 
       <!-- Main DPI result -->
       <div class="result-main" id="result-main">
-        <span class="caption-mono" style="color: var(--color-mute);">Measured DPI</span>
+        <span class="caption-mono" style="color: var(--color-mute);">{t("dpiToolStrings.measuredDpi")}</span>
         <span class="result-dpi display-xl" id="result-dpi">—</span>
       </div>
 
@@ -167,12 +176,12 @@
       <div class="result-comparison" id="result-comparison" style="display: none;">
         <div class="comparison-bar">
           <div class="comparison-configured">
-            <span class="body-sm" style="font-weight: 500;">Configured</span>
+            <span class="body-sm" style="font-weight: 500;">{t("dpiToolStrings.configured")}</span>
             <span class="code-text" id="comparison-configured-val">—</span>
           </div>
-          <div class="comparison-vs body-sm" style="color: var(--color-mute);">vs</div>
+          <div class="comparison-vs body-sm" style="color: var(--color-mute);">{t("dpiToolStrings.vs")}</div>
           <div class="comparison-measured">
-            <span class="body-sm" style="font-weight: 500;">Measured</span>
+            <span class="body-sm" style="font-weight: 500;">{t("dpiToolStrings.measured")}</span>
             <span class="code-text" id="comparison-measured-val">—</span>
           </div>
         </div>
@@ -182,24 +191,24 @@
       <!-- Details -->
       <div class="result-details" id="result-details" style="display: none;">
         <div class="detail-row">
-          <span class="body-sm" style="color: var(--color-body);">Pixels moved</span>
+          <span class="body-sm" style="color: var(--color-body);">{t("dpiToolStrings.detailPixels")}</span>
           <span class="code-text" id="detail-pixels">—</span>
         </div>
         <div class="detail-row">
-          <span class="body-sm" style="color: var(--color-body);">Target distance</span>
+          <span class="body-sm" style="color: var(--color-body);">{t("dpiToolStrings.detailDistance")}</span>
           <span class="code-text" id="detail-distance">—</span>
         </div>
         <div class="detail-row">
-          <span class="body-sm" style="color: var(--color-body);">Axis</span>
+          <span class="body-sm" style="color: var(--color-body);">{t("dpiToolStrings.detailAxis")}</span>
           <span class="code-text" id="detail-axis">—</span>
         </div>
       </div>
 
       <!-- History -->
       <div class="result-history" id="result-history">
-        <h4 class="caption-mono" style="margin: 24px 0 12px; color: var(--color-mute);">Test History</h4>
+        <h4 class="caption-mono" style="margin: 24px 0 12px; color: var(--color-mute);">{t("dpiToolStrings.testHistory")}</h4>
         <div class="history-empty body-sm" id="history-empty" style="color: var(--color-mute);">
-          No tests yet. Click the test area to begin.
+          {t("dpiToolStrings.noTests")}
         </div>
         <div class="history-list" id="history-list"></div>
       </div>
@@ -210,7 +219,7 @@
   <div class="modal-overlay" id="calibration-modal" style="display: none;">
     <div class="modal-content card">
       <div class="modal-header">
-        <h3 class="display-sm" style="margin: 0;">Calibrate Virtual Ruler</h3>
+        <h3 class="display-sm" style="margin: 0;">{t("dpiToolStrings.calibrateModalTitle")}</h3>
         <button class="icon-btn" id="close-calibration-btn" style="background: transparent; border: none; cursor: pointer; color: var(--color-body);">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -218,16 +227,16 @@
       
       <div class="modal-body" style="margin-top: 16px;">
         <p class="body-sm" style="margin: 0 0 16px; color: var(--color-body);">
-          We need your monitor's size and resolution to accurately display a physical ruler on your screen.
+          {t("dpiToolStrings.calibrateModalDesc")}
         </p>
 
         <div class="unit-toggle" id="calibration-mode-toggle" style="margin-bottom: 16px; display: flex; width: 100%;">
-          <button class="unit-btn active" data-mode="preset" style="flex: 1; text-align: center;">Presets</button>
-          <button class="unit-btn" data-mode="manual" style="flex: 1; text-align: center;">Manual Entry</button>
+          <button class="unit-btn active" data-mode="preset" style="flex: 1; text-align: center;">{t("dpiToolStrings.presets")}</button>
+          <button class="unit-btn" data-mode="manual" style="flex: 1; text-align: center;">{t("dpiToolStrings.manualEntry")}</button>
         </div>
 
         <div class="setting-group" id="preset-group">
-          <label class="setting-label body-sm">Select Monitor</label>
+          <label class="setting-label body-sm">{t("dpiToolStrings.selectMonitor")}</label>
           <select class="input" id="preset-select" style="width: 100%; cursor: pointer;">
             <!-- Options populated by JS -->
           </select>
@@ -235,11 +244,11 @@
 
         <div id="manual-entry-section" style="display: none;">
           <div class="setting-group">
-            <label class="setting-label body-sm">Screen diagonal (inches)</label>
+            <label class="setting-label body-sm">{t("dpiToolStrings.screenDiagonal")}</label>
             <input type="number" class="input" id="modal-screen-diagonal" placeholder="e.g. 24" min="5" max="100" step="0.1" />
           </div>
           <div class="setting-group">
-            <label class="setting-label body-sm">Resolution</label>
+            <label class="setting-label body-sm">{t("dpiToolStrings.resolution")}</label>
             <div style="display: flex; gap: 8px; align-items: center;">
               <input type="number" class="input" id="modal-screen-width" placeholder="1920" />
               <span class="body-sm" style="color: var(--color-mute);">×</span>
@@ -248,7 +257,7 @@
           </div>
         </div>
 
-        <button class="btn btn-primary" id="apply-calibration-btn" style="width: 100%; margin-top: 16px;">Apply Calibration</button>
+        <button class="btn btn-primary" id="apply-calibration-btn" style="width: 100%; margin-top: 16px;">{t("dpiToolStrings.applyCalibration")}</button>
       </div>
     </div>
   </div>
@@ -714,6 +723,134 @@
 
 <script>
   // ─── DPI Measurement Engine ───
+  const dpiToolEl = document.getElementById("dpi-tool") as HTMLElement;
+  const langCode = dpiToolEl?.dataset.lang || "en";
+  const tStrings = JSON.parse(dpiToolEl?.dataset.translations || "{}");
+
+  const WARNING_TRANSLATIONS: Record<string, string> = {
+    en: "Please calibrate your screen in the settings before starting.",
+    de: "Bitte kalibrieren Sie Ihren Bildschirm in den Einstellungen, bevor Sie starten.",
+    fr: "Veuillez calibrer votre écran dans les paramètres avant de commencer.",
+    es: "Por favor, calibra tu pantalla en la configuración antes de comenzar.",
+    it: "Calibra lo schermo nelle impostazioni prima di iniziare.",
+    nl: "Kalibreer uw scherm in de instellingen voordat u begint.",
+    pl: "Skalibruj ekran w ustawieniach przed rozpoczęciem.",
+    pt: "Por favor, calibre sua tela nas configurações antes de começar.",
+    ru: "Пожалуйста, откалибруйте экран в настройках перед началом.",
+    zh: "开始前请先在设置中校准您的屏幕。",
+    sv: "Kalibrera din skärm i inställningarna innan du börjar.",
+    da: "Kalibrer din skærm i indstillingerne, før du starter.",
+    no: "Kalibrer skjermen i innstillingene før du starter.",
+    fi: "Kalibroi näyttösi asetuksista ennen aloittamista."
+  };
+
+  const TOO_SHORT_TRANSLATIONS: Record<string, string> = {
+    en: "Too short",
+    de: "Zu kurz",
+    fr: "Trop court",
+    es: "Demasiado corto",
+    it: "Troppo corto",
+    nl: "Te kort",
+    pl: "Za krótko",
+    pt: "Muito curto",
+    ru: "Слишком коротко",
+    zh: "移动距离太短",
+    sv: "För kort",
+    da: "For kort",
+    no: "For kort",
+    fi: "Liian lyhyt"
+  };
+
+  const LAPTOP_TRANSLATIONS: Record<string, string> = {
+    en: "Laptop",
+    de: "Laptop",
+    fr: "Ordinateur portable",
+    es: "Portátil",
+    it: "Portatile",
+    nl: "Laptop",
+    pl: "Laptop",
+    pt: "Notebook",
+    ru: "Ноутбук",
+    zh: "笔记本电脑",
+    sv: "Bärbar dator",
+    da: "Bærbar",
+    no: "Bærbar",
+    fi: "Kannettava"
+  };
+
+  const DIRECTION_TRANSLATIONS: Record<string, { virtual: string; physical: string; template: string }> = {
+    en: {
+      virtual: "virtual ruler",
+      physical: "ruler",
+      template: "Physically move your mouse {dist} using your {rulerType} {arrow}"
+    },
+    de: {
+      virtual: "virtuelle Lineal",
+      physical: "Lineal",
+      template: "Bewegen Sie Ihre Maus physikalisch um {dist} mit Ihrem {rulerType} {arrow}"
+    },
+    fr: {
+      virtual: "règle virtuelle",
+      physical: "règle",
+      template: "Déplacez physiquement votre souris de {dist} en utilisant votre {rulerType} {arrow}"
+    },
+    es: {
+      virtual: "regla virtual",
+      physical: "regla",
+      template: "Mueve físicamente tu ratón {dist} usando tu {rulerType} {arrow}"
+    },
+    it: {
+      virtual: "righello virtuale",
+      physical: "righello",
+      template: "Muovi fisicamente il mouse di {dist} usando il {rulerType} {arrow}"
+    },
+    nl: {
+      virtual: "virtuele liniaal",
+      physical: "liniaal",
+      template: "Beweeg uw muis fysiek {dist} met behulp van uw {rulerType} {arrow}"
+    },
+    pl: {
+      virtual: "wirtualnej linijki",
+      physical: "linijki",
+      template: "Przesuń fizycznie mysz o {dist}, używając {rulerType} {arrow}"
+    },
+    pt: {
+      virtual: "régua virtual",
+      physical: "régua",
+      template: "Mova fisicamente o mouse {dist} usando sua {rulerType} {arrow}"
+    },
+    ru: {
+      virtual: "виртуальную линейку",
+      physical: "линейку",
+      template: "Физически переместите мышь на {dist}, используя {rulerType} {arrow}"
+    },
+    zh: {
+      virtual: "虚拟尺子",
+      physical: "实体尺子",
+      template: "请使用您的 {rulerType} 将鼠标物理移动 {dist} {arrow}"
+    },
+    sv: {
+      virtual: "virtuella linjal",
+      physical: "linjal",
+      template: "Flytta din mus fysiskt {dist} med din {rulerType} {arrow}"
+    },
+    da: {
+      virtual: "virtuelle lineal",
+      physical: "lineal",
+      template: "Flyt din mus fysisk {dist} ved hjælp af din {rulerType} {arrow}"
+    },
+    no: {
+      virtual: "virtuelle lineal",
+      physical: "lineal",
+      template: "Flytt musen fysisk {dist} ved hjelp av din {rulerType} {arrow}"
+    },
+    fi: {
+      virtual: "virtuaalista viivainta",
+      physical: "viivainta",
+      template: "Liikuta hiirtä fyysisesti {dist} käyttämällä {rulerType} {arrow}"
+    }
+  };
+
   const testArea = document.getElementById("test-area") as HTMLElement;
   const testOverlay = document.getElementById("test-overlay") as HTMLElement;
   const testActiveInfo = document.getElementById("test-active-info") as HTMLElement;
@@ -782,7 +919,7 @@
     currentPPI = parseFloat(savedPPI);
     isCalibrated = true;
     if (calibrationStatusText) {
-      calibrationStatusText.textContent = "Calibrated";
+      calibrationStatusText.textContent = tStrings.calibrated || "Calibrated";
       calibrationStatusText.style.color = "var(--color-success)";
     }
   }
@@ -833,10 +970,11 @@
     if (!presetSelect) return;
     presetSelect.innerHTML = "";
     
+    const laptopWord = LAPTOP_TRANSLATIONS[langCode] || "Laptop";
     MONITOR_PRESETS.forEach((p, index) => {
       const option = document.createElement("option");
       option.value = index.toString();
-      option.textContent = p.name;
+      option.textContent = p.name.replace("Laptop", laptopWord);
       presetSelect.appendChild(option);
     });
 
@@ -887,7 +1025,7 @@
       isCalibrated = true;
       
       if (calibrationStatusText) {
-        calibrationStatusText.textContent = "Calibrated";
+        calibrationStatusText.textContent = tStrings.calibrated || "Calibrated";
         calibrationStatusText.style.color = "var(--color-success)";
       }
       
@@ -895,7 +1033,7 @@
       calibrationModal.style.display = "none";
       if (isActive && virtualRulerCb.checked) drawRuler();
     } else {
-      alert("Please ensure all fields are correctly filled.");
+      alert(tStrings.fillAllFieldsError || "Please ensure all fields are correctly filled.");
     }
   });
 
@@ -974,7 +1112,7 @@
     rulerCtx.fillStyle = colors.unitLabel;
     rulerCtx.font = "400 11px 'Geist Mono', monospace";
     rulerCtx.textAlign = "left";
-    rulerCtx.fillText(currentUnit === "cm" ? "cm" : "inches", 6, 60);
+    rulerCtx.fillText(currentUnit === "cm" ? tStrings.cm : tStrings.inch, 6, 60);
   }
 
   window.addEventListener("resize", () => {
@@ -987,10 +1125,14 @@
   function updateDirectionLabel() {
     if (!directionLabel) return;
     const isVirtual = virtualRulerCb && virtualRulerCb.checked;
-    const rulerType = isVirtual ? "virtual ruler" : "ruler";
+    const dirObj = DIRECTION_TRANSLATIONS[langCode] || DIRECTION_TRANSLATIONS.en;
+    const rulerType = isVirtual ? dirObj.virtual : dirObj.physical;
     const dist = getTargetDisplay();
     const arrow = currentAxis === "x" ? "→" : "↓";
-    directionLabel.textContent = `Physically move your mouse ${dist} using your ${rulerType} ${arrow}`;
+    directionLabel.textContent = dirObj.template
+      .replace("{dist}", dist)
+      .replace("{rulerType}", rulerType)
+      .replace("{arrow}", arrow);
   }
 
   // Unit toggle
@@ -1030,19 +1172,15 @@
 
   function getTargetDisplay(): string {
     const val = parseFloat(targetDistanceInput.value) || 5;
-    return `${val} ${currentUnit === "cm" ? "cm" : "in"}`;
+    return `${val} ${currentUnit === "cm" ? tStrings.cm : tStrings.inch}`;
   }
 
   // Get pixels moved along active axis
   function getAxisPixels(): number {
     const rawPixels = Math.abs(currentAxis === "x" ? totalDeltaX : totalDeltaY);
     if (usingRawInput) {
-      // With unadjustedMovement, movementX/Y are raw hardware counts
-      // — no OS processing, no DPR scaling. Direct 1:1 with mouse DPI.
       return Math.round(rawPixels);
     }
-    // Fallback: without unadjustedMovement, values are in CSS pixels
-    // and may be scaled by devicePixelRatio on high-DPI displays.
     const dpr = window.devicePixelRatio || 1;
     return Math.round(rawPixels * dpr);
   }
@@ -1072,10 +1210,6 @@
   function startTest() {
     if (isActive) return;
 
-    // Try to get raw, unprocessed mouse input via unadjustedMovement.
-    // This bypasses OS-level pointer acceleration, speed scaling, and
-    // DPR transformations — giving us true hardware DPI counts.
-    // Falls back to standard pointer lock if not supported.
     try {
       const promise = (testArea as any).requestPointerLock({
         unadjustedMovement: true,
@@ -1086,16 +1220,13 @@
             usingRawInput = true;
           })
           .catch(() => {
-            // unadjustedMovement not supported — fall back
             usingRawInput = false;
             testArea.requestPointerLock();
           });
       } else {
-        // Older API returns void, pointer lock was already requested
         usingRawInput = false;
       }
     } catch {
-      // Options parameter not supported at all
       usingRawInput = false;
       testArea.requestPointerLock();
     }
@@ -1133,7 +1264,7 @@
         drawRuler();
       }
       if (statStatus) {
-        statStatus.textContent = usingRawInput ? "Measuring (raw)" : "Measuring...";
+        statStatus.textContent = tStrings.statusMeasuring + (usingRawInput ? " (raw)" : "...");
         statStatus.style.color = "var(--color-cyan)";
       }
       updateLiveStats();
@@ -1178,7 +1309,7 @@
     const pixels = getAxisPixels();
     if (pixels < 10) {
       if (statStatus) {
-        statStatus.textContent = "Too short";
+        statStatus.textContent = TOO_SHORT_TRANSLATIONS[langCode] || "Too short";
         statStatus.style.color = "var(--color-warning)";
       }
       return;
@@ -1194,7 +1325,7 @@
     }
 
     if (statStatus) {
-      statStatus.textContent = "Complete";
+      statStatus.textContent = tStrings.statusSuccess || "Complete";
       statStatus.style.color = "#50e3c2";
     }
 
@@ -1204,7 +1335,7 @@
     if (resultDetails) resultDetails.style.display = "block";
     if (detailPixels) detailPixels.textContent = String(pixels);
     if (detailDistance) detailDistance.textContent = getTargetDisplay();
-    if (detailAxis) detailAxis.textContent = currentAxis === "x" ? "Horizontal" : "Vertical";
+    if (detailAxis) detailAxis.textContent = currentAxis === "x" ? tStrings.horizontal : tStrings.vertical;
 
     // Comparison
     const configuredDpi = parseInt(configuredDpiInput.value);
@@ -1219,10 +1350,14 @@
       if (comparisonDiff) {
         if (Math.abs(parseFloat(pctDiff)) < 5) {
           comparisonDiff.className = "comparison-diff match";
-          comparisonDiff.textContent = `✓ Match — ${pctDiff}% difference`;
+          comparisonDiff.textContent = tStrings.diffPerfect || `✓ Match — ${pctDiff}% difference`;
         } else {
           comparisonDiff.className = "comparison-diff off";
-          comparisonDiff.textContent = `${diff > 0 ? "+" : ""}${pctDiff}% difference (${diff > 0 ? "+" : ""}${diff} DPI)`;
+          const descVal = `${diff > 0 ? "+" : ""}${diff} DPI`;
+          const diffVal = Math.abs(parseFloat(pctDiff)).toFixed(1);
+          comparisonDiff.textContent = (tStrings.diffOff || "DPI is off by {diff}% ({desc})")
+            .replace("{diff}", diffVal)
+            .replace("{desc}", descVal);
         }
       }
     }
@@ -1232,7 +1367,7 @@
       dpi,
       pixels,
       distance: getTargetDisplay(),
-      axis: currentAxis === "x" ? "H" : "V",
+      axis: ((currentAxis === "x" ? tStrings.horizontal : tStrings.vertical) || "H").charAt(0).toUpperCase(),
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
     };
     history.unshift(entry);
@@ -1254,7 +1389,7 @@
     if (testPromptDesc) {
       const originalText = testPromptDesc.textContent;
       const originalColor = testPromptDesc.style.color;
-      testPromptDesc.textContent = "Please calibrate your screen in the settings before starting.";
+      testPromptDesc.textContent = WARNING_TRANSLATIONS[langCode] || "Please calibrate your screen in the settings before starting.";
       testPromptDesc.style.color = "var(--color-warning)";
       setTimeout(() => {
         testPromptDesc.textContent = originalText;
@@ -1292,7 +1427,7 @@
     if (statPixels) statPixels.textContent = "0";
     if (statDpi) statDpi.textContent = "—";
     if (statStatus) {
-      statStatus.textContent = "Ready";
+      statStatus.textContent = tStrings.statusReady || "Ready";
       statStatus.style.color = "var(--color-cyan)";
     }
     if (historyEmpty) historyEmpty.style.display = "block";
