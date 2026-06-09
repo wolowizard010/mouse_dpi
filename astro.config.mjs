@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://mousedpianalyzer.com',
+  site: 'https://mymousedpi.com',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'de', 'fr', 'es', 'it', 'nl', 'pl', 'pt', 'ru', 'zh', 'sv', 'da', 'no', 'fi'],

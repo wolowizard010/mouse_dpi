@@ -18,7 +18,7 @@ const {
 
 const lang = Astro.currentLocale || "en";
 const relativePath = getCleanPath(Astro.url.pathname);
-const siteUrl = Astro.site || new URL("https://mousedpianalyzer.com");
+const siteUrl = Astro.site || new URL("https://mymousedpi.com");
 const canonical = new URL(getRelativeLocaleUrl(lang, relativePath), siteUrl).href;
 
 const siteName = "My Mouse DPI";
@@ -52,6 +52,7 @@ const locales = ["de", "fr", "es", "it", "nl", "pl", "pt", "ru", "zh", "sv", "da
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta name="generator" content={Astro.generator} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Hreflang Alternate Links for International SEO -->
     <link rel="alternate" hreflang="x-default" href={new URL(getRelativeLocaleUrl("en", relativePath), siteUrl).href} />
@@ -94,7 +95,7 @@ const locales = ["de", "fr", "es", "it", "nl", "pl", "pt", "ru", "zh", "sv", "da
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": siteName,
-      "url": "https://mousedpianalyzer.com",
+      "url": "https://mymousedpi.com",
       "description": description,
       "applicationCategory": "UtilityApplication",
       "operatingSystem": "Web Browser",
