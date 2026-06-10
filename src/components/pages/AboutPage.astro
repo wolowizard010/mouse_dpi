@@ -4,9 +4,11 @@ import Navbar from "../Navbar.astro";
 import Footer from "../Footer.astro";
 import { useTranslations } from "../../i18n/utils";
 import { getRelativeLocaleUrl } from "astro:i18n";
+import { getAboutTranslations } from "../../i18n/aboutTranslations";
 
 const lang = Astro.currentLocale || 'en';
 const t = useTranslations(lang);
+const aboutT = getAboutTranslations(lang);
 ---
 
 <Layout
@@ -20,7 +22,7 @@ const t = useTranslations(lang);
       <div class="about-layout">
         <article class="about-content">
           <div class="page-header">
-            <span class="caption-mono" style="color: var(--color-mute);">{t("nav.about")}</span>
+            <span class="caption-mono" style="color: var(--color-mute);">{t("footer.about")}</span>
             <h1 class="display-lg" style="margin: 8px 0 0;">{t("about.title")}</h1>
           </div>
 
@@ -36,6 +38,20 @@ const t = useTranslations(lang);
               {t("about.whyDesc1")}
             </p>
             <p class="body-md" style="color: var(--color-body);" set:html={t("about.whyDesc2")}>
+            </p>
+          </section>
+
+          <section class="content-section">
+            <h2 class="display-md">{aboutT.calibrationTitle}</h2>
+            <p class="body-md" style="color: var(--color-body);">
+              {aboutT.calibrationDesc}
+            </p>
+          </section>
+
+          <section class="content-section">
+            <h2 class="display-md">{aboutT.useCasesTitle}</h2>
+            <p class="body-md" style="color: var(--color-body);">
+              {aboutT.useCasesDesc}
             </p>
           </section>
 

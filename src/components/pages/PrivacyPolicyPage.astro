@@ -32,7 +32,7 @@ const sections = t("privacy.sections") as Array<{ title: string; content: string
                 <>
                   {section.content.split("jasdeep97.dev@gmail.com")[0]}
                   <a href="mailto:jasdeep97.dev@gmail.com" style="color: var(--color-link); text-decoration: none;">jasdeep97.dev@gmail.com</a>
-                  {section.content.split("jasdeep97.dev@gmail.com")[1]}
+                  {section.content.split("jasdeep97.dev@gmail.com")[1].replace(/^\.|\.$|。/, "")}
                 </>
               ) : (
                 section.content
