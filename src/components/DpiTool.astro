@@ -206,7 +206,31 @@ const t = useTranslations(lang);
 
       <!-- History -->
       <div class="result-history" id="result-history">
-        <h4 class="caption-mono" style="margin: 24px 0 12px; color: var(--color-mute);">{t("dpiToolStrings.testHistory")}</h4>
+        <div class="history-header" style="display: flex; justify-content: space-between; align-items: center; margin: 24px 0 12px;">
+          <h4 class="caption-mono" style="margin: 0; color: var(--color-mute);">{t("dpiToolStrings.testHistory")}</h4>
+          <button class="clear-history-btn" id="clear-history-btn" style="display: none; background: transparent; border: none; padding: 4px; cursor: pointer; color: var(--color-mute); transition: color 0.15s ease;" title={t("dpiToolStrings.reset")} aria-label={t("dpiToolStrings.reset")}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="history-stats" id="history-stats">
+          <div class="history-stat-box">
+            <span class="caption-mono" id="history-avg-label" style="font-size: 10px; color: var(--color-mute); text-transform: uppercase;">Avg DPI</span>
+            <span class="body-sm-strong" id="history-avg-val">—</span>
+          </div>
+          <div class="history-stat-box">
+            <span class="caption-mono" id="history-consistency-label" style="font-size: 10px; color: var(--color-mute); text-transform: uppercase;">Consistency</span>
+            <span class="body-sm-strong" id="history-consistency-val">—</span>
+          </div>
+          <div class="history-stat-box">
+            <span class="caption-mono" id="history-tests-label" style="font-size: 10px; color: var(--color-mute); text-transform: uppercase;">Tests</span>
+            <span class="body-sm-strong" id="history-tests-val">—</span>
+          </div>
+        </div>
+
         <div class="history-empty body-sm" id="history-empty" style="color: var(--color-mute);">
           {t("dpiToolStrings.noTests")}
         </div>
@@ -615,32 +639,258 @@ const t = useTranslations(lang);
     padding: 6px 0;
   }
 
+  /* History stats cards */
+  .history-stats {
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 10px;
+    background: var(--color-canvas-soft-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-hairline);
+  }
+
+  .history-stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .history-stat-box:not(:first-child) {
+    border-left: 1px solid var(--color-hairline);
+  }
+
+  /* History List */
   .history-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    max-height: 200px;
+    gap: 8px;
+    max-height: 280px;
     overflow-y: auto;
+    padding-right: 2px;
   }
 
+  /* History Item Card */
+  /* History Item Card Wrapper (timeline bullet/index outside, faded box inside) */
   .history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    font-size: 13px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Bullet and Index wrapper outside the box */
+  .history-item-bullet-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 24px;
+    flex-shrink: 0;
+    justify-content: center;
+  }
+
+  .history-item-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .history-item-bullet.neutral {
+    background: var(--color-hairline-strong);
+    box-shadow: 0 0 0 3px rgba(161, 161, 161, 0.15);
+  }
+
+  .history-item-bullet.match {
+    background: var(--color-link);
+    box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.2);
+  }
+
+  .history-item-bullet.off {
+    background: var(--color-warning);
+    box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.25);
+  }
+
+  .history-item-index {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--color-mute);
+    line-height: 1;
+  }
+
+  /* Faded Box containing test data */
+  .history-item-box {
+    flex: 1;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 10px;
+    padding: 10px 14px;
+    background: var(--color-canvas-soft-2);
+    border-radius: var(--radius-sm);
+    position: relative;
+    min-width: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+  }
+
+  .history-item:hover .history-item-box {
     background: var(--color-canvas-soft);
-    border-radius: var(--radius-xs);
-    font-size: 12px;
-    font-family: var(--font-mono);
+    border-color: var(--color-hairline);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Left Side: Prominent DPI and deviation */
+  .history-box-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-start;
   }
 
   .history-item-dpi {
-    font-weight: 500;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
     color: var(--color-ink);
+    line-height: 1.1;
   }
 
-  .history-item-meta {
+  .dpi-label-small {
+    font-size: 10px;
+    font-weight: 400;
     color: var(--color-mute);
+    margin-left: 2px;
+  }
+
+  /* Deviation badges */
+  .dev-badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: var(--radius-xs);
+    width: fit-content;
+    line-height: 1;
+  }
+
+  .dev-badge.match {
+    background: rgba(0, 112, 243, 0.06);
+    color: var(--color-link);
+  }
+
+  .dev-badge.off {
+    background: rgba(245, 166, 35, 0.08);
+    color: var(--color-warning);
+  }
+
+  /* Right Side: details and time */
+  .history-box-right {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-end;
+    text-align: right;
+    margin-right: 18px;
+    min-width: 0;
+  }
+
+  .history-item-meta-details {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-body);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  .history-item-time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-mute);
+    line-height: 1;
+  }
+
+  /* Delete button */
+  .delete-history-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: var(--color-mute);
+    border-radius: var(--rounded-full);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    opacity: 0;
+  }
+
+  .history-item-box:hover .delete-history-btn {
+    opacity: 0.6;
+  }
+
+  .delete-history-btn:hover {
+    background: var(--color-error-soft);
+    color: var(--color-error) !important;
+    opacity: 1 !important;
+  }
+
+  .clear-history-btn:hover {
+    color: var(--color-error) !important;
+  }
+
+  /* Animation classes */
+  .history-item.adding {
+    animation: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .history-item.removing {
+    animation: slide-out 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: none;
+  }
+
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+      height: var(--item-height, 46px);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+      height: 0px;
+      margin-bottom: 0px;
+      overflow: hidden;
+    }
   }
 
   /* Responsive */
@@ -851,6 +1101,57 @@ const t = useTranslations(lang);
     }
   };
 
+  const AVG_TRANSLATIONS: Record<string, string> = {
+    en: "Avg. DPI",
+    de: "Durchschn. DPI",
+    fr: "DPI Moyen",
+    es: "DPI Promedio",
+    it: "DPI Medio",
+    pt: "DPI Médio",
+    ru: "Средний DPI",
+    zh: "平均 DPI",
+    sv: "Medel DPI",
+    da: "Gns. DPI",
+    no: "Snitt DPI",
+    fi: "Keskimm. DPI",
+    pl: "Średni DPI",
+    nl: "Gem. DPI"
+  };
+  
+  const CONSISTENCY_TRANSLATIONS: Record<string, string> = {
+    en: "Consistency",
+    de: "Konsistenz",
+    fr: "Cohérence",
+    es: "Consistencia",
+    it: "Coerenza",
+    pt: "Consistência",
+    ru: "Стабильность",
+    zh: "一致性",
+    sv: "Konsistens",
+    da: "Konsistens",
+    no: "Konsistens",
+    fi: "Johdonmukaisuus",
+    pl: "Spójność",
+    nl: "Consistentie"
+  };
+
+  const TESTS_TRANSLATIONS: Record<string, string> = {
+    en: "Tests",
+    de: "Tests",
+    fr: "Tests",
+    es: "Pruebas",
+    it: "Test",
+    pt: "Testes",
+    ru: "Тесты",
+    zh: "测试次数",
+    sv: "Tester",
+    da: "Tests",
+    no: "Tester",
+    fi: "Testit",
+    pl: "Testy",
+    nl: "Tests"
+  };
+
   const testArea = document.getElementById("test-area") as HTMLElement;
   const testOverlay = document.getElementById("test-overlay") as HTMLElement;
   const testActiveInfo = document.getElementById("test-active-info") as HTMLElement;
@@ -877,6 +1178,13 @@ const t = useTranslations(lang);
   const historyEmpty = document.getElementById("history-empty") as HTMLElement;
   const historyList = document.getElementById("history-list") as HTMLElement;
 
+  // History Actions and Stats DOM
+  const clearHistoryBtn = document.getElementById("clear-history-btn") as HTMLButtonElement;
+  const historyStats = document.getElementById("history-stats") as HTMLElement;
+  const historyAvgVal = document.getElementById("history-avg-val") as HTMLElement;
+  const historyConsistencyVal = document.getElementById("history-consistency-val") as HTMLElement;
+  const historyTestsVal = document.getElementById("history-tests-val") as HTMLElement;
+
   // Settings
   const targetDistanceInput = document.getElementById("target-distance") as HTMLInputElement;
   const configuredDpiInput = document.getElementById("configured-dpi") as HTMLInputElement;
@@ -889,7 +1197,20 @@ const t = useTranslations(lang);
   let currentUnit: "inch" | "cm" = "inch";
   let currentAxis: "x" | "y" = "x";
   let usingRawInput = false; // Whether unadjustedMovement was granted
-  let history: Array<{ dpi: number; pixels: number; distance: string; axis: string; time: string }> = [];
+
+  interface HistoryEntry {
+    id: string;
+    dpi: number;
+    pixels: number;
+    distance: string;
+    axis: string;
+    time: string;
+    configuredDpi?: number;
+    runNumber: number;
+  }
+  let history: Array<HistoryEntry> = [];
+  let lastAddedId: string | null = null;
+  let testCounter = 0;
 
   // Calibration State
   let currentPPI = 96;
@@ -923,6 +1244,18 @@ const t = useTranslations(lang);
       calibrationStatusText.style.color = "var(--color-success)";
     }
   }
+
+  // Initialize history labels and state
+  const historyAvgLabel = document.getElementById("history-avg-label");
+  const historyConsistencyLabel = document.getElementById("history-consistency-label");
+  const historyTestsLabel = document.getElementById("history-tests-label");
+  
+  if (historyAvgLabel) historyAvgLabel.textContent = AVG_TRANSLATIONS[langCode] || AVG_TRANSLATIONS.en;
+  if (historyConsistencyLabel) historyConsistencyLabel.textContent = CONSISTENCY_TRANSLATIONS[langCode] || CONSISTENCY_TRANSLATIONS.en;
+  if (historyTestsLabel) historyTestsLabel.textContent = TESTS_TRANSLATIONS[langCode] || TESTS_TRANSLATIONS.en;
+
+  // Render initial empty state or UI
+  renderHistory();
 
   // Presets definition
   const MONITOR_PRESETS = [
@@ -1363,25 +1696,152 @@ const t = useTranslations(lang);
     }
 
     // History
-    const entry = {
+    testCounter++;
+    const entry: HistoryEntry = {
+      id: Math.random().toString(36).substring(2, 9),
       dpi,
       pixels,
       distance: getTargetDisplay(),
       axis: ((currentAxis === "x" ? tStrings.horizontal : tStrings.vertical) || "H").charAt(0).toUpperCase(),
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+      configuredDpi: configuredDpi > 0 ? configuredDpi : undefined,
+      runNumber: testCounter,
     };
+    
+    lastAddedId = entry.id;
     history.unshift(entry);
+    if (history.length > 5) {
+      history = history.slice(0, 5);
+    }
+    renderHistory();
+    lastAddedId = null;
+  }
 
+  function deleteHistoryEntry(id: string) {
+    if (!historyList) return;
+    const itemEl = historyList.querySelector(`[data-id="${id}"]`) as HTMLElement;
+    if (itemEl) {
+      const height = itemEl.offsetHeight;
+      itemEl.style.setProperty("--item-height", `${height}px`);
+      itemEl.classList.add("removing");
+      
+      itemEl.addEventListener("animationend", () => {
+        history = history.filter((entry) => entry.id !== id);
+        renderHistory();
+      }, { once: true });
+    } else {
+      history = history.filter((entry) => entry.id !== id);
+      renderHistory();
+    }
+  }
+
+  function renderHistoryStats() {
+    if (!historyStats || !historyAvgVal || !historyConsistencyVal || !historyTestsVal) return;
+    
+    if (history.length === 0) {
+      historyStats.style.display = "none";
+      if (clearHistoryBtn) clearHistoryBtn.style.display = "none";
+      return;
+    }
+    
+    historyStats.style.display = "grid";
+    if (clearHistoryBtn) clearHistoryBtn.style.display = "block";
+    
+    historyTestsVal.textContent = String(history.length);
+    
+    const sum = history.reduce((acc, entry) => acc + entry.dpi, 0);
+    const avg = Math.round(sum / history.length);
+    historyAvgVal.textContent = String(avg);
+    
+    if (history.length <= 1) {
+      historyConsistencyVal.textContent = "100%";
+      historyConsistencyVal.style.color = "var(--color-success)";
+    } else {
+      const mean = sum / history.length;
+      const variance = history.reduce((acc, entry) => acc + Math.pow(entry.dpi - mean, 2), 0) / history.length;
+      const stdDev = Math.sqrt(variance);
+      const cv = stdDev / mean;
+      const consistency = Math.max(0, Math.min(100, Math.round((1 - cv) * 100)));
+      historyConsistencyVal.textContent = `${consistency}%`;
+      
+      if (consistency >= 95) {
+        historyConsistencyVal.style.color = "var(--color-success)";
+      } else if (consistency >= 85) {
+        historyConsistencyVal.style.color = "var(--color-cyan)";
+      } else {
+        historyConsistencyVal.style.color = "var(--color-warning)";
+      }
+    }
+  }
+
+  function renderHistory() {
+    if (!historyList) return;
+    
+    historyList.innerHTML = "";
+    
+    if (history.length === 0) {
+      if (historyEmpty) historyEmpty.style.display = "block";
+      if (historyStats) historyStats.style.display = "none";
+      if (clearHistoryBtn) clearHistoryBtn.style.display = "none";
+      return;
+    }
+    
     if (historyEmpty) historyEmpty.style.display = "none";
-    if (historyList) {
+    
+    history.forEach((entry) => {
       const item = document.createElement("div");
       item.className = "history-item";
+      item.setAttribute("data-id", entry.id);
+      
+      if (entry.id === lastAddedId) {
+        item.classList.add("adding");
+      }
+      
+      let deviationHtml = "";
+      let bulletClass = "neutral";
+      if (entry.configuredDpi && entry.configuredDpi > 0) {
+        const diff = entry.dpi - entry.configuredDpi;
+        const pctDiff = ((diff / entry.configuredDpi) * 100).toFixed(1);
+        const sign = diff > 0 ? "+" : "";
+        const isClose = Math.abs(parseFloat(pctDiff)) < 5;
+        const badgeClass = isClose ? "dev-badge match" : "dev-badge off";
+        deviationHtml = `<span class="${badgeClass}">${sign}${pctDiff}%</span>`;
+        bulletClass = isClose ? "match" : "off";
+      }
+      
       item.innerHTML = `
-        <span class="history-item-dpi">${entry.dpi} DPI</span>
-        <span class="history-item-meta">${entry.pixels}px · ${entry.distance} · ${entry.axis} · ${entry.time}</span>
+        <div class="history-item-bullet-wrapper">
+          <span class="history-item-bullet ${bulletClass}"></span>
+          <span class="history-item-index">#${entry.runNumber}</span>
+        </div>
+        <div class="history-item-box">
+          <div class="history-box-left">
+            <span class="history-item-dpi">${entry.dpi}<span class="dpi-label-small">DPI</span></span>
+            ${deviationHtml}
+          </div>
+          <div class="history-box-right">
+            <span class="history-item-meta-details" title="${entry.distance} · ${entry.pixels}px">${entry.distance} · ${entry.pixels}px</span>
+            <span class="history-item-time">${entry.time}</span>
+          </div>
+          <button class="delete-history-btn" aria-label="Delete entry" data-id="${entry.id}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
       `;
-      historyList.prepend(item);
-    }
+      
+      const deleteBtn = item.querySelector(".delete-history-btn");
+      deleteBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteHistoryEntry(entry.id);
+      });
+      
+      historyList.appendChild(item);
+    });
+    
+    renderHistoryStats();
   }
 
   function showCalibrationWarning() {
@@ -1415,11 +1875,29 @@ const t = useTranslations(lang);
     }
   });
 
+  // Clear History button event listener
+  clearHistoryBtn?.addEventListener("click", () => {
+    const confirmClear = confirm(
+      langCode === "zh" ? "您确定要清除所有测试记录吗？" :
+      langCode === "de" ? "Sind Sie sicher, dass Sie den Testverlauf löschen möchten?" :
+      langCode === "fr" ? "Êtes-vous sûr de vouloir effacer l'historique des tests ?" :
+      langCode === "es" ? "¿Está seguro de que desea borrar el historial de pruebas?" :
+      "Are you sure you want to clear your test history?"
+    );
+    if (confirmClear) {
+      history = [];
+      testCounter = 0;
+      renderHistory();
+    }
+  });
+
   // Reset
   resetBtn.addEventListener("click", () => {
     totalDeltaX = 0;
     totalDeltaY = 0;
     history = [];
+    testCounter = 0;
+    renderHistory();
 
     if (resultDpi) resultDpi.textContent = "—";
     if (resultComparison) resultComparison.style.display = "none";
@@ -1430,8 +1908,6 @@ const t = useTranslations(lang);
       statStatus.textContent = tStrings.statusReady || "Ready";
       statStatus.style.color = "var(--color-cyan)";
     }
-    if (historyEmpty) historyEmpty.style.display = "block";
-    if (historyList) historyList.innerHTML = "";
     if (livePixels) livePixels.textContent = "0";
   });
 
