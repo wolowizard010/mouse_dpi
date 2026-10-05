@@ -10,6 +10,7 @@ export interface TranslationSchema {
     howItWorks: string;
     testDpi: string;
     logo: string;
+    blog?: string;
   };
   footer: {
     tagline: string;
@@ -21,6 +22,7 @@ export interface TranslationSchema {
     privacy: string;
     terms: string;
     copyright: string;
+    blog?: string;
   };
   index: {
     heroTitle: string;

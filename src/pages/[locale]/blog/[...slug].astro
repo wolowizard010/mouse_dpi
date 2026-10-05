@@ -1,0 +1,23 @@
+---
+import { getCollection } from 'astro:content';
+import BlogPostPage from '../../../components/pages/BlogPostPage.astro';
+
+export async function getStaticPaths() {
+  const locales = ['de', 'fr', 'es', 'it', 'nl', 'pl', 'pt', 'ru', 'zh', 'sv', 'da', 'no', 'fi'];
+  const posts = await getCollection('blog');
+
+  const paths = [];
+  for (const locale of locales) {
+    for (const post of posts) {
+      paths.push({
+        params: { locale, slug: post.id },
+        props: { post },
+      });
+    }
+  }
+  return paths;
+}
+
+const { post } = Astro.props;
+---
+<BlogPostPage post={post} />

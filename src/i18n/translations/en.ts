@@ -12,6 +12,7 @@ export const en: TranslationSchema = {
     howItWorks: "How It Works",
     testDpi: "Test DPI",
     logo: "My Mouse DPI",
+    blog: "Blog",
   },
   footer: {
     tagline: "Precise mouse DPI measurement, right in your browser.",
@@ -23,6 +24,7 @@ export const en: TranslationSchema = {
     privacy: "Privacy Policy",
     terms: "Terms & Conditions",
     copyright: "My Mouse DPI. Free & open-source.",
+    blog: "Blog",
   },
   index: {
     heroTitle: "Measure your mouse DPI with precision.",
