@@ -3,8 +3,9 @@ title: "What is Mouse DPI? The Definitive Guide to Sensitivity, Sensors & Accura
 description: "Confused about mouse DPI? Discover what DPI actually means, the difference between DPI and sensitivity, high vs low DPI myths, and how to find your ideal setting."
 pubDate: 2026-10-05
 updatedDate: 2026-10-05
-author: "Alex Morgan"
+author: "Jasdeep Singh"
 authorRole: "Hardware & Esports Tech Lead"
+authorBio: "Jasdeep is a hardware engineer and competitive gaming analyst with over 8 years of experience evaluating optical mouse sensors, micro-switches, and esports peripherals."
 category: "Guides"
 tags: ["Mouse DPI", "Gaming", "Hardware", "Sensitivity", "Esports", "Setup Guide"]
 featured: true
@@ -218,6 +219,8 @@ If you want to know your mouse's exact real-world hardware DPI down to the singl
 3. Place a physical ruler beside your mousepad.
 4. Click and hold the target box in the analyzer, glide your mouse exactly **2 inches** (or 5 centimeters) against the ruler edge, and release.
 5. The analyzer calculates your exact real-time DPI, revealing your sensor's true tracking density and deviation percentage!
+
+For a full step-by-step walkthrough covering software, physical buttons, and manual calculations, check out our guide on **[How to Check Your Mouse DPI](/blog/how-to-check-mouse-dpi)**.
 
 ---
 

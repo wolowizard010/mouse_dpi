@@ -217,7 +217,7 @@ const jsonLdBreadcrumbs = {
                 <span class="bio-role">{post.data.authorRole}</span>
               </div>
               <p class="bio-text body-sm">
-                Alex is a competitive gaming hardware specialist and input latency analyst with over 8 years of experience evaluating optical mouse sensors, micro-switches, and esports peripherals.
+                {post.data.authorBio || `${post.data.author} is a hardware and gaming peripherals specialist with extensive hands-on experience evaluating optical sensors, mouse ergonomics, and competitive input performance.`}
               </p>
             </div>
           </div>

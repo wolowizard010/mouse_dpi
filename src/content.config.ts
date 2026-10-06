@@ -11,6 +11,7 @@ const blog = defineCollection({
     author: z.string().default('MouseDPI Team'),
     authorRole: z.string().default('Hardware & Esports Analyst'),
     authorAvatar: z.string().optional(),
+    authorBio: z.string().optional(),
     category: z.string().default('Guides'),
     tags: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
