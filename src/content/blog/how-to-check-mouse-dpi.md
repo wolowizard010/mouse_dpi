@@ -401,4 +401,6 @@ To recap the recommended workflow:
 3. **If you want true hardware accuracy:** Run a 2-inch calibration stroke on our free **[Mouse DPI Analyzer](/dpi-analyzer)** to measure your sensor's real-world tracking and detect any hidden sensor deviation.
 4. **Lock in your settings:** Set Windows pointer speed to 6/11, disable pointer acceleration, and adjust your sensitivity in each game's internal settings menu.
 
+Need to adjust or reconfigure your sensitivity? Check out our complete guide on **[How to Change Mouse DPI](/blog/how-to-change-mouse-dpi)**.
+
 Ready to check your gear? Head over to our [free tools](/dpi-analyzer) and calibrate your setup today!

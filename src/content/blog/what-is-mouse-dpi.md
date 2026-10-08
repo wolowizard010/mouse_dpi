@@ -250,4 +250,4 @@ Remember:
 3. Disable **Enhance Pointer Precision** in Windows to build true muscle memory.
 4. Measure your hardware's real-world tracking using our free **[Mouse DPI Analyzer](/dpi-analyzer)**.
 
-Have questions about your current setup or want to share your favorite eDPI combination? Check out our other hardware guides and test your gear right here on **My Mouse DPI**!
+Have questions about your current setup or want to configure your sensitivity? Read our companion guides on **[How to Check Your Mouse DPI](/blog/how-to-check-mouse-dpi)** and **[How to Change Mouse DPI](/blog/how-to-change-mouse-dpi)**, and test your gear right here on **My Mouse DPI**!
