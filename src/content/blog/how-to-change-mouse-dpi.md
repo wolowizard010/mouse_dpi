@@ -471,6 +471,8 @@ Open your mouse companion software (e.g., Razer Synapse or Logitech G HUB), redu
 
 Changing your mouse DPI gives you complete control over your computing ergonomics, productivity speed, and gaming precision.
 
+Unsure which value suits your monitor and game genre best? Read our comprehensive benchmark breakdown on **[What is a Good DPI on a Mouse?](/blog/what-is-a-good-mouse-dpi)**.
+
 To ensure the best possible setup:
 1. **Set your hardware DPI** to **800 or 1,600 DPI** using your mouse's companion software or physical toggle button.
 2. **Save the profile** to your mouse's onboard memory so your preferences travel with your hardware.
