@@ -342,4 +342,6 @@ If you take away just one lesson from sensor physics and esports engineering, le
 * If you play **fast-paced games on a 1440p or 4K monitor**, or want **minimal input latency**, set your mouse to **1,600 DPI** and lower your in-game sensitivity proportionally.
 * If you use dual monitors for productivity, stick to **1,600 DPI** for comfortable wrist ergonomics.
 
+Curious whether 30,000+ DPI marketing numbers actually matter? Read our mythbusting guide on **[Is a Higher DPI Mouse Better?](/blog/is-a-higher-dpi-mouse-better)**.
+
 Ready to find out how your current mouse performs? Head over to our free [Mouse DPI Analyzer](/dpi-analyzer), verify your true sensor tracking, and dial in your setup today!
