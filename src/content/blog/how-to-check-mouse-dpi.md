@@ -173,7 +173,7 @@ Here is how to identify your DPI through hardware inspection:
 
 ### 1. The Dedicated DPI Cycle Button
 
-Examine the top of your mouse, directly behind or adjacent to the scroll wheel. Many multi-purpose and ergonomic mice feature a small button labeled **"DPI"**, **"CPI"**, or decorated with an icon resembling a pointer or speedometer.
+Examine the top of your mouse, directly behind or adjacent to the scroll wheel. Many multi-purpose and ergonomic mice feature a small button labeled **"DPI"**, **"CPI"**, or decorated with an icon resembling a pointer or speedometer. (To learn how this button operates and how to prevent accidental clicks, read our guide on **[What is a DPI Button on a Mouse?](/blog/what-is-dpi-button-on-mouse)**).
 
 ```
 Common Mouse Button Layout:

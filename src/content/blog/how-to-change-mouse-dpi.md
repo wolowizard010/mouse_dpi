@@ -70,7 +70,7 @@ Before diving into step-by-step instructions, understand how the four different 
 
 ## Method 1: Change DPI Using the Physical Mouse Button
 
-The fastest and most direct way to change DPI on modern mice is through physical hardware controls.
+The fastest and most direct way to change DPI on modern mice is through physical hardware controls. (For a deep dive into button varieties, LED color codes, and accidental click prevention, check out our guide on **[What is a DPI Button on a Mouse?](/blog/what-is-dpi-button-on-mouse)**).
 
 ### 1. The Top DPI Button (Behind the Scroll Wheel)
 
