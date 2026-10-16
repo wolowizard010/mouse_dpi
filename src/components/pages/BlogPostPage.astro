@@ -5,6 +5,8 @@ import Footer from "../Footer.astro";
 import { render } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import type { CollectionEntry } from "astro:content";
+import { getBlogUi, getPostTranslation } from "../../i18n/blogI18n";
+import { languages, type SupportedLocale } from "../../i18n/ui";
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -13,12 +15,30 @@ interface Props {
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
 
-const lang = Astro.currentLocale || 'en';
+const lang = (Astro.currentLocale || 'en') as SupportedLocale;
 const siteUrl = Astro.site || new URL("https://mymousedpi.com");
 const canonicalUrl = new URL(getRelativeLocaleUrl(lang, `blog/${post.id}`), siteUrl).href;
 
+const blogUi = getBlogUi(lang);
+const translated = getPostTranslation(post.id, lang);
+
+const postTitle = translated?.title || post.data.title;
+const postDescription = translated?.description || post.data.description;
+const postReadTime = translated?.readTime || post.data.readTime;
+const postCategory = translated?.category || post.data.category;
+const postTags = translated?.tags || post.data.tags || [];
+const postAuthorRole = translated?.authorRole || post.data.authorRole;
+const postAuthorBio = translated?.authorBio || post.data.authorBio;
+const languageName = languages[lang] || 'English';
+const isNonEnglish = lang !== 'en';
+
 function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
+  const localeMap: Record<string, string> = {
+    en: 'en-US', de: 'de-DE', fr: 'fr-FR', es: 'es-ES', it: 'it-IT',
+    nl: 'nl-NL', pl: 'pl-PL', pt: 'pt-BR', ru: 'ru-RU', zh: 'zh-CN',
+    sv: 'sv-SE', da: 'da-DK', no: 'nb-NO', fi: 'fi-FI',
+  };
+  return new Intl.DateTimeFormat(localeMap[lang] || 'en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -32,14 +52,14 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const jsonLdArticle = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": post.data.title,
-  "description": post.data.description,
+  "headline": postTitle,
+  "description": postDescription,
   "datePublished": post.data.pubDate.toISOString(),
   "dateModified": (post.data.updatedDate || post.data.pubDate).toISOString(),
   "author": {
     "@type": "Person",
     "name": post.data.author,
-    "jobTitle": post.data.authorRole,
+    "jobTitle": postAuthorRole,
   },
   "publisher": {
     "@type": "Organization",
@@ -75,7 +95,7 @@ const jsonLdBreadcrumbs = {
     {
       "@type": "ListItem",
       "position": 3,
-      "name": post.data.title,
+      "name": postTitle,
       "item": canonicalUrl
     }
   ]
@@ -83,8 +103,8 @@ const jsonLdBreadcrumbs = {
 ---
 
 <Layout
-  title={`${post.data.title} — My Mouse DPI`}
-  description={post.data.description}
+  title={`${postTitle} — My Mouse DPI`}
+  description={postDescription}
   canonicalUrl={canonicalUrl}
 >
   <!-- Inject Rich Article JSON-LD Structured Data -->
@@ -105,23 +125,23 @@ const jsonLdBreadcrumbs = {
           <li><span class="bc-sep">/</span></li>
           <li><a href={getRelativeLocaleUrl(lang, "blog")}>Blog</a></li>
           <li><span class="bc-sep">/</span></li>
-          <li aria-current="page"><span class="bc-current">{post.data.title}</span></li>
+          <li aria-current="page"><span class="bc-current">{postTitle}</span></li>
         </ol>
       </nav>
 
       <!-- Article Header -->
       <header class="post-header animate-fade-in">
         <div class="header-badges">
-          <span class="badge category-pill">{post.data.category}</span>
-          <span class="caption-mono read-time">{post.data.readTime}</span>
+          <span class="badge category-pill">{postCategory}</span>
+          <span class="caption-mono read-time">{postReadTime}</span>
         </div>
 
         <h1 class="post-title display-xl">
-          {post.data.title}
+          {postTitle}
         </h1>
 
         <p class="post-description body-lg">
-          {post.data.description}
+          {postDescription}
         </p>
 
         <div class="post-byline">
@@ -131,20 +151,20 @@ const jsonLdBreadcrumbs = {
             </div>
             <div class="byline-text">
               <span class="byline-name">{post.data.author}</span>
-              <span class="byline-role">{post.data.authorRole}</span>
+              <span class="byline-role">{postAuthorRole}</span>
             </div>
           </div>
 
           <div class="byline-meta">
             <div class="date-item">
-              <span class="date-label">Published</span>
+              <span class="date-label">{blogUi.published}</span>
               <time datetime={post.data.pubDate.toISOString()}>
                 {formatDate(post.data.pubDate)}
               </time>
             </div>
             {post.data.updatedDate && (
               <div class="date-item">
-                <span class="date-label">Updated</span>
+                <span class="date-label">{blogUi.updated}</span>
                 <time datetime={post.data.updatedDate.toISOString()}>
                   {formatDate(post.data.updatedDate)}
                 </time>
@@ -152,6 +172,20 @@ const jsonLdBreadcrumbs = {
             )}
           </div>
         </div>
+
+        {isNonEnglish && (
+          <div class="translation-notice-bar card-soft">
+            <div class="notice-left">
+              <span class="notice-icon">🌐</span>
+              <span class="notice-text">
+                <strong>{blogUi.viewingIn} {languageName}</strong> — {blogUi.autoTranslateNotice}
+              </span>
+            </div>
+            <a href={getRelativeLocaleUrl('en', `blog/${post.id}`)} class="notice-en-link">
+              {blogUi.viewOriginalEn} →
+            </a>
+          </div>
+        )}
       </header>
 
       <!-- Post Main Content Area (Article + Sticky Sidebar) -->
@@ -171,7 +205,7 @@ const jsonLdBreadcrumbs = {
                     <line x1="3" y1="12" x2="3.01" y2="12"></line>
                     <line x1="3" y1="18" x2="3.01" y2="18"></line>
                   </svg>
-                  <span>Table of Contents / Index</span>
+                  <span>{blogUi.tableOfContents}</span>
                 </span>
                 <svg class="mobile-toc-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
@@ -189,16 +223,16 @@ const jsonLdBreadcrumbs = {
             </details>
           )}
 
-          <div class="blog-prose">
+          <div class="blog-prose" id="article-prose">
             <Content />
           </div>
 
           <!-- Post Tags -->
-          {post.data.tags && post.data.tags.length > 0 && (
+          {postTags && postTags.length > 0 && (
             <div class="post-footer-tags">
-              <span class="tags-label">Tagged in:</span>
+              <span class="tags-label">{blogUi.taggedIn}</span>
               <div class="tags-list">
-                {post.data.tags.map((tag: string) => (
+                {postTags.map((tag: string) => (
                   <span class="badge tag-badge">#{tag}</span>
                 ))}
               </div>
@@ -212,12 +246,12 @@ const jsonLdBreadcrumbs = {
             </div>
             <div class="bio-content">
               <div class="bio-header">
-                <span class="bio-written">Written by</span>
+                <span class="bio-written">{blogUi.writtenBy}</span>
                 <h3 class="bio-name">{post.data.author}</h3>
-                <span class="bio-role">{post.data.authorRole}</span>
+                <span class="bio-role">{postAuthorRole}</span>
               </div>
               <p class="bio-text body-sm">
-                {post.data.authorBio || `${post.data.author} is a hardware and gaming peripherals specialist with extensive hands-on experience evaluating optical sensors, mouse ergonomics, and competitive input performance.`}
+                {postAuthorBio}
               </p>
             </div>
           </div>
@@ -225,13 +259,13 @@ const jsonLdBreadcrumbs = {
           <!-- Bottom Tool Callout -->
           <div class="post-bottom-cta card-soft">
             <div class="bottom-cta-text">
-              <h3 class="display-sm" style="margin: 0 0 8px;">Ready to test your real mouse DPI?</h3>
+              <h3 class="display-sm" style="margin: 0 0 8px;">{blogUi.bottomCtaTitle}</h3>
               <p class="body-sm" style="color: var(--color-body); margin: 0;">
-                Find out if your mouse sensor suffers from deviation using our free web analyzer.
+                {blogUi.bottomCtaDesc}
               </p>
             </div>
             <a href={getRelativeLocaleUrl(lang, "dpi-analyzer")} class="btn btn-primary btn-sm">
-              Test DPI Now
+              {blogUi.bottomCtaBtn}
             </a>
           </div>
 
@@ -242,7 +276,7 @@ const jsonLdBreadcrumbs = {
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
-              <span>Back to all guides & articles</span>
+              <span>{blogUi.backToBlog}</span>
             </a>
           </div>
         </article>
@@ -252,18 +286,25 @@ const jsonLdBreadcrumbs = {
           <div class="sticky-sidebar-inner">
             <!-- Share widget -->
             <div class="sidebar-widget card share-widget">
-              <h4 class="sidebar-widget-title caption-mono">Share Guide</h4>
+              <h4 class="sidebar-widget-title caption-mono">{blogUi.shareGuide}</h4>
               <div class="share-buttons">
-                <button id="copy-link-btn" class="share-btn" title="Copy article link" aria-label="Copy article link">
+                <button
+                  id="copy-link-btn"
+                  class="share-btn"
+                  title={blogUi.copyLink}
+                  aria-label={blogUi.copyLink}
+                  data-copied-text={blogUi.copied}
+                  data-default-text={blogUi.copyLink}
+                >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                   </svg>
-                  <span id="copy-btn-text">Copy Link</span>
+                  <span id="copy-btn-text">{blogUi.copyLink}</span>
                 </button>
 
                 <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(canonicalUrl)}`}
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(postTitle)}&url=${encodeURIComponent(canonicalUrl)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="share-btn"
@@ -277,7 +318,7 @@ const jsonLdBreadcrumbs = {
                 </a>
 
                 <a
-                  href={`https://www.reddit.com/submit?url=${encodeURIComponent(canonicalUrl)}&title=${encodeURIComponent(post.data.title)}`}
+                  href={`https://www.reddit.com/submit?url=${encodeURIComponent(canonicalUrl)}&title=${encodeURIComponent(postTitle)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="share-btn"
@@ -295,7 +336,7 @@ const jsonLdBreadcrumbs = {
             <!-- Table of Contents -->
             {tocHeadings.length > 0 && (
               <div class="sidebar-widget card toc-widget">
-                <h4 class="sidebar-widget-title caption-mono">Table of Contents</h4>
+                <h4 class="sidebar-widget-title caption-mono">{blogUi.tableOfContents}</h4>
                 <nav class="toc-list" aria-label="Table of contents">
                   <ul>
                     {tocHeadings.map((heading) => (
@@ -312,13 +353,13 @@ const jsonLdBreadcrumbs = {
 
             <!-- Quick Tool Widget -->
             <div class="sidebar-widget card-soft tools-widget">
-              <span class="caption-mono" style="color: var(--color-link);">Free Online Tool</span>
-              <h4 class="tools-widget-title">Check Your Mouse DPI</h4>
+              <span class="caption-mono" style="color: var(--color-link);">{blogUi.toolsCtaBadge}</span>
+              <h4 class="tools-widget-title">{blogUi.toolsCtaTitle}</h4>
               <p class="body-sm" style="color: var(--color-body); margin: 0 0 14px;">
-                Calibrate your display and measure your true optical sensitivity in your browser.
+                {blogUi.toolsCtaDesc}
               </p>
               <a href={getRelativeLocaleUrl(lang, "dpi-analyzer")} class="btn btn-primary btn-sm" style="width: 100%;">
-                Open Analyzer
+                {blogUi.launchDpiAnalyzer}
               </a>
             </div>
           </div>
@@ -328,6 +369,38 @@ const jsonLdBreadcrumbs = {
   </main>
 
   <Footer />
+
+  {isNonEnglish && (
+    <div id="google_translate_element" style="display:none;" aria-hidden="true"></div>
+    <script is:inline define:vars={{ targetLang: lang === 'zh' ? 'zh-CN' : lang }}>
+      (function() {
+        const domain = window.location.hostname;
+        const cookieVal = '/en/' + targetLang;
+        document.cookie = 'googtrans=' + cookieVal + '; path=/;';
+        if (domain && domain !== 'localhost' && !domain.startsWith('127.')) {
+          document.cookie = 'googtrans=' + cookieVal + '; path=/; domain=' + domain + ';';
+          const parts = domain.split('.');
+          if (parts.length > 2) {
+            document.cookie = 'googtrans=' + cookieVal + '; path=/; domain=.' + parts.slice(-2).join('.') + ';';
+          }
+        }
+
+        window.googleTranslateElementInit = function() {
+          new window.google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: targetLang,
+            autoDisplay: false,
+            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+          }, 'google_translate_element');
+        };
+
+        const script = document.createElement('script');
+        script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        script.async = true;
+        document.head.appendChild(script);
+      })();
+    </script>
+  )}
 </Layout>
 
 <script is:inline>
@@ -347,15 +420,19 @@ const jsonLdBreadcrumbs = {
     const copyBtn = document.getElementById('copy-link-btn');
     const copyText = document.getElementById('copy-btn-text');
     if (copyBtn && copyText) {
+      const originalText = copyBtn.getAttribute('data-default-text') || copyText.textContent;
+      const copiedMsg = copyBtn.getAttribute('data-copied-text') || 'Copied!';
       copyBtn.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(window.location.href);
-          copyText.textContent = 'Copied!';
+          copyText.textContent = copiedMsg;
+          copyBtn.classList.add('copied');
           setTimeout(() => {
-            copyText.textContent = 'Copy Link';
+            copyText.textContent = originalText;
+            copyBtn.classList.remove('copied');
           }, 2000);
         } catch (err) {
-          copyText.textContent = 'Copied!';
+          copyText.textContent = copiedMsg;
         }
       });
     }
@@ -880,5 +957,76 @@ const jsonLdBreadcrumbs = {
       justify-content: flex-start;
       gap: 16px;
     }
+  }
+
+  /* Translation notice bar */
+  .translation-notice-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 18px;
+    margin-top: 24px;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+  }
+
+  .notice-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-ink);
+  }
+
+  .notice-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .notice-en-link {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--color-link);
+    white-space: nowrap;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .notice-en-link:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
+    .translation-notice-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+
+  /* Clean styling for Google Translate element when active */
+  :global(.goog-te-banner-frame.skiptranslate) {
+    display: none !important;
+  }
+  :global(body) {
+    top: 0px !important;
+  }
+  :global(#goog-gt-tt) {
+    display: none !important;
+  }
+  :global(.goog-te-balloon-frame) {
+    display: none !important;
+  }
+  :global(.goog-text-highlight) {
+    background: none !important;
+    box-shadow: none !important;
+  }
+  :global(.skiptranslate) {
+    display: none !important;
+  }
+  :global(#google_translate_element) {
+    display: none !important;
   }
 </style>
