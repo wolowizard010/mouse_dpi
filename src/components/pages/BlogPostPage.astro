@@ -227,6 +227,42 @@ const jsonLdBreadcrumbs = {
             <Content />
           </div>
 
+          {isNonEnglish && (
+            <script is:inline>
+              (function() {
+                var prose = document.getElementById('article-prose');
+                if (!prose) return;
+
+                // Google Translate skips <pre> and <code> by default.
+                // Replace <pre> with <div class="astro-code astro-pre-box"> and <code> with <div> or <span>
+                // so diagrams, terminal flowcharts, and technical boxes are translated!
+                var preList = Array.from(prose.querySelectorAll('pre'));
+                preList.forEach(function(pre) {
+                  var div = document.createElement('div');
+                  div.className = (pre.className ? pre.className + ' ' : '') + 'astro-pre-box';
+                  var style = pre.getAttribute('style');
+                  if (style) div.setAttribute('style', style);
+                  div.setAttribute('tabindex', '0');
+                  div.setAttribute('translate', 'yes');
+                  div.innerHTML = pre.innerHTML;
+                  pre.parentNode.replaceChild(div, pre);
+                });
+
+                var codeList = Array.from(prose.querySelectorAll('code'));
+                codeList.forEach(function(code) {
+                  var isInsideBox = code.closest('.astro-pre-box');
+                  var replacement = document.createElement(isInsideBox ? 'div' : 'span');
+                  replacement.className = (code.className ? code.className + ' ' : '') + (isInsideBox ? 'astro-code-block' : 'inline-code');
+                  var style = code.getAttribute('style');
+                  if (style) replacement.setAttribute('style', style);
+                  replacement.setAttribute('translate', 'yes');
+                  replacement.innerHTML = code.innerHTML;
+                  code.parentNode.replaceChild(replacement, code);
+                });
+              })();
+            </script>
+          )}
+
           <!-- Post Tags -->
           {postTags && postTags.length > 0 && (
             <div class="post-footer-tags">
@@ -386,6 +422,31 @@ const jsonLdBreadcrumbs = {
         }
 
         window.googleTranslateElementInit = function() {
+          var prose = document.getElementById('article-prose');
+          if (prose) {
+            prose.querySelectorAll('pre').forEach(function(pre) {
+              var div = document.createElement('div');
+              div.className = (pre.className ? pre.className + ' ' : '') + 'astro-pre-box';
+              var style = pre.getAttribute('style');
+              if (style) div.setAttribute('style', style);
+              div.setAttribute('tabindex', '0');
+              div.setAttribute('translate', 'yes');
+              div.innerHTML = pre.innerHTML;
+              pre.parentNode.replaceChild(div, pre);
+            });
+
+            prose.querySelectorAll('code').forEach(function(code) {
+              var isInsideBox = code.closest('.astro-pre-box');
+              var replacement = document.createElement(isInsideBox ? 'div' : 'span');
+              replacement.className = (code.className ? code.className + ' ' : '') + (isInsideBox ? 'astro-code-block' : 'inline-code');
+              var style = code.getAttribute('style');
+              if (style) replacement.setAttribute('style', style);
+              replacement.setAttribute('translate', 'yes');
+              replacement.innerHTML = code.innerHTML;
+              code.parentNode.replaceChild(replacement, code);
+            });
+          }
+
           new window.google.translate.TranslateElement({
             pageLanguage: 'en',
             includedLanguages: targetLang,

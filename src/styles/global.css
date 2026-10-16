@@ -560,7 +560,8 @@ img {
 }
 
 /* Inline code */
-.blog-prose :not(pre) > code {
+.blog-prose :not(pre) > code,
+.blog-prose .inline-code {
   font-family: var(--font-mono);
   font-size: 0.88em;
   background: var(--color-canvas-soft-2);
@@ -572,7 +573,8 @@ img {
 
 /* Terminal / Code blocks (consistent high-contrast dark terminal across both light & dark mode) */
 .blog-prose pre,
-.blog-prose pre.astro-code {
+.blog-prose pre.astro-code,
+.blog-prose .astro-pre-box {
   background-color: #111216 !important;
   color: #f1f5f9 !important;
   border: 1px solid #282a32 !important;
@@ -582,11 +584,14 @@ img {
   margin: 1.75em 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   position: relative;
+  white-space: pre !important;
+  font-family: var(--font-mono) !important;
 }
 
 /* Terminal Window Buttons (macOS style red/yellow/green dots) */
 .blog-prose pre::before,
-.blog-prose pre.astro-code::before {
+.blog-prose pre.astro-code::before,
+.blog-prose .astro-pre-box::before {
   content: "";
   position: absolute;
   top: 16px;
@@ -600,7 +605,8 @@ img {
 }
 
 .blog-prose pre code,
-.blog-prose pre.astro-code code {
+.blog-prose pre.astro-code code,
+.blog-prose .astro-code-block {
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
@@ -609,11 +615,20 @@ img {
   line-height: 1.65;
   color: #f1f5f9 !important;
   display: block;
+  white-space: pre !important;
 }
 
 .blog-prose pre code span,
-.blog-prose pre.astro-code span {
+.blog-prose pre.astro-code span,
+.blog-prose .astro-pre-box span,
+.blog-prose .astro-code-block span {
   font-family: var(--font-mono) !important;
+}
+
+.blog-prose pre code .line,
+.blog-prose .astro-code-block .line {
+  display: block;
+  min-height: 1.5em;
 }
 
 .blog-prose table {
