@@ -8,7 +8,7 @@ authorRole: "Gaming Peripherals Specialist & Hardware Analyst"
 authorBio: "Harman is a gaming peripherals specialist and tech writer with deep expertise in mouse sensor architectures, input latency benchmarking, and competitive FPS mechanics."
 category: "Guides"
 tags: ["Mouse DPI", "Hardware", "Tutorial", "Gaming", "Peripherals", "Setup Guide"]
-featured: true
+featured: false
 readTime: "7 min read"
 ---
 
