@@ -8,7 +8,7 @@ authorRole: "Hardware Lead & Esports Tech Specialist"
 authorBio: "Jasdeep is a hardware engineer and competitive gaming analyst with over 8 years of experience evaluating optical sensors, mouse input latency, and esports peripherals."
 category: "Guides"
 tags: ["Mouse DPI", "Gaming", "eDPI", "Esports", "Hardware", "Aiming"]
-featured: true
+featured: false
 readTime: "7 min read"
 ---
 
