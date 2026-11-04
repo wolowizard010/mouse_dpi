@@ -8,7 +8,7 @@ authorRole: "Senior Hardware & Input Systems Engineer"
 authorBio: "Verma is a senior hardware engineer and peripherals specialist with over a decade of experience testing optical sensors, firmware protocols, and ergonomic input devices."
 category: "Guides"
 tags: ["Mouse DPI", "Tutorial", "Hardware", "Gaming", "Windows 11", "macOS", "Settings", "Setup Guide"]
-featured: true
+featured: false
 readTime: "12 min read"
 ---
 

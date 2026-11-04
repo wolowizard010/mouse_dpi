@@ -27,7 +27,9 @@ const localizedPosts = allPosts.map((p) => {
   };
 });
 
-const featuredPost = localizedPosts.find((p) => p.data.featured) || localizedPosts[0];
+const featuredPost = localizedPosts.find((p) => p.id === 'what-is-mouse-dpi' && p.data.featured)
+  || localizedPosts.find((p) => p.data.featured)
+  || localizedPosts[0];
 
 // Extract all unique categories
 const categories = [blogUi.allCategories, ...new Set(localizedPosts.map((p) => p.displayCategory))];
